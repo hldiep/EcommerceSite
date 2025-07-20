@@ -58,6 +58,7 @@ const AudioProducts = () => {
                 {featuredAudioProducts.map((product) => (
                     <div
                         key={product.id}
+                        onClick={() => navigate('/detail')}
                         className="bg-white rounded-xl shadow-lg transition p-3 relative group"
                     >
                         <div className="absolute top-0 left-0 bg-red-600 text-white text-xs px-2 py-1 rounded-xl">

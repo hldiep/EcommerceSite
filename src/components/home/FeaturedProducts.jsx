@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaStar, FaHeart } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const featuredPhones = [
     {
@@ -56,14 +57,18 @@ const formatPrice = (price) => {
 
 const FeaturedProducts = () => {
     const navigate = useNavigate();
+    const handleClick = () => {
+        navigate('/mobile');
+    };
     return (
         <div className="px-4 mt-10">
-            <button onClick={() => navigate('/mobile')}
+            <button onClick={handleClick}
                 className="text-2xl font-bold mb-4">ĐIỆN THOẠI NỔI BẬT</button>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {featuredPhones.map((product) => (
                     <div
                         key={product.id}
+                        onClick={() => navigate('/detail')}
                         className="bg-white rounded-xl shadow-lg transition p-3 relative group"
                     >
                         <div className="absolute top-0 left-0 bg-red-600 text-white text-xs px-2 py-1 rounded-xl">

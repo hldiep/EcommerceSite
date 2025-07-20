@@ -1,13 +1,16 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FaClipboardList, FaGem, FaHistory, FaHome, FaLink, FaMapMarkerAlt, FaMedal, FaSearch, FaShoppingCart, FaSignOutAlt, FaTags, FaUserCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const User = () => {
     const totalOrders = 0;
+    const [user, setUser] = useState(null);
     const navigate = useNavigate();
     const handleLogout = () => {
-        toast.success('Đăng xuất thành công');
+        localStorage.removeItem('user');
+        setUser(null);
+        toast.info('Bạn đã đăng xuất tài khoản');
         navigate('/login');
     };
     return (
@@ -86,7 +89,7 @@ const User = () => {
                             </li>
                             <li
                                 onClick={handleLogout}
-                                className="flex items-center space-x-2 py-2 hover:bg-gray-100 rounded px-2 cursor-pointer text-red-600 font-medium mt-4"
+                                className="flex items-center space-x-2 py-2 hover:bg-gray-100 rounded cursor-pointer text-red-600 font-medium mt-4"
                             >
                                 <FaSignOutAlt />
                                 <span>Đăng xuất</span>

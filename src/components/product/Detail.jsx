@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FaHome } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify';
+import LoginModal from '../login/LoginModal';
 const product = {
     name: "Điện thoại ZTE Blade A55",
     rating: 5,
@@ -104,9 +106,16 @@ const reviews = [
 ];
 const Detail = () => {
     const navigate = useNavigate();
-
+    const [showModal, setShowModal] = useState(false);
     const [selectedVariant, setSelectedVariant] = useState(product.variants[0]);
     const [selectedColor, setSelectedColor] = useState(product.colors[0]);
+    const [user, setUser] = useState(null);
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
             <div className='container mt-20 mb-10'>
@@ -230,10 +239,27 @@ const Detail = () => {
                                 </span>
                             </div>
                             <div className="flex gap-4 mt-6">
-                                <button className="flex-1 bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 transition">
+                                <button onClick={() => {
+                                    if (user) {
+                                        navigate('/payment');
+                                    } else {
+                                        toast.info('Vui lòng đăng nhập để mua sản phẩm');
+                                        setShowModal(true);
+                                    }
+                                }}
+                                    className="flex-1 bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 transition">
                                     Mua ngay
                                 </button>
-                                <button className="flex-1 border border-red-600 text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50 transition">
+                                <LoginModal show={showModal} onClose={() => setShowModal(false)} />
+                                <button onClick={() => {
+                                    if (user) {
+                                        toast.success('Thêm vào giỏ thành công')
+                                    } else {
+                                        toast.info('Vui lòng đăng nhập để thêm vào giỏ');
+                                        setShowModal(true);
+                                    }
+                                }}
+                                    className="flex-1 border border-red-600 text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50 transition">
                                     Thêm vào giỏ
                                 </button>
                             </div>

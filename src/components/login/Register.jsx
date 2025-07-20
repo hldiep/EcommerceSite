@@ -33,7 +33,7 @@ const Register = () => {
             <div className='container mt-10 mb-10'>
                 <div className='items-center text-center'>
                     <h2 className='text-red-600 text-3xl font-bold'>Đăng ký để trở thành thành viên ngay</h2>
-                    <img src="https://imgs.vietnamnet.vn/Images/vnn/2014/07/31/16/20140731161420-logo-xiaomi.jpg" alt="Mascot" className="mx-auto h-36 mb-4 mt-10" />
+                    <img src="https://image.plo.vn/w460/Uploaded/2025/yqjvzdjwp/2014_08_01/MPUC20140731161420-logo-xiaomi.jpg.webp" alt="Mascot" className="mx-auto h-36 mb-4 mt-10" />
                 </div>
                 <h2 className='items-center text-center text-gray-600 text-sm'>Hãy điền đầy đủ thông tin đăng ký dưới đây</h2>
                 <div className="min-h-screen flex items-center justify-center px-4">
@@ -53,9 +53,9 @@ const Register = () => {
                                 <input type="tel" name="phone" value={form.phone} onChange={handleChange} className="text-sm w-full border rounded px-3 py-2 outline-none" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">Email (Bắt buộc)</label>
+                                <label className="block text-sm font-medium mb-1">Email (Không bắt buộc)</label>
                                 <input type="email" name="email" value={form.email} onChange={handleChange} className="text-sm w-full border rounded px-3 py-2 outline-none" />
-                                <p className="text-xs text-green-600 mt-1">✔ Hóa đơn VAT sẽ được gửi qua email này</p>
+
                             </div>
                         </div>
 

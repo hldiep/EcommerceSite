@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { FaSearch, FaShoppingCart, FaThLarge, FaUser } from 'react-icons/fa'
 import LoginModal from '../login/LoginModal';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const Header = () => {
     const [showModal, setShowModal] = useState(false);
@@ -18,6 +19,7 @@ const Header = () => {
     const handleLogout = () => {
         localStorage.removeItem('user');
         setUser(null);
+        toast.info('Bạn đã đăng xuất tài khoản');
         navigate('/');
     };
 
@@ -44,10 +46,20 @@ const Header = () => {
                     </div>
                 </div>
 
-                <div className="relative flex items-center cursor-pointer hover:opacity-90 hover:bg-red-600 px-3 py-2 rounded-md">
+                <button
+                    onClick={() => {
+                        if (user) {
+                            navigate('/cart');
+                        } else {
+                            toast.info('Vui lòng đăng nhập để xem giỏ hàng');
+                            setShowModal(true);
+                        }
+                    }}
+                    className="relative flex items-center cursor-pointer hover:opacity-90 hover:bg-red-600 px-3 py-2 rounded-md"
+                >
                     <FaShoppingCart className="text-xl" />
                     <span className="ml-1">Giỏ hàng</span>
-                </div>
+                </button>
 
                 {user ? (
                     <div className="flex items-center gap-3">

@@ -29,7 +29,7 @@ const LoginModal = ({ show, onClose }) => {
                     >
                         <button onClick={onClose} className="absolute top-2 right-2 text-xl font-bold text-gray-500 hover:text-black">&times;</button>
                         <h2 className="text-2xl font-bold text-center text-red-500 mb-2">ĐĂNG NHẬP</h2>
-                        <img src="https://imgs.vietnamnet.vn/Images/vnn/2014/07/31/16/20140731161420-logo-xiaomi.jpg" alt="Mascot" className="mx-auto h-20 mb-4" />
+                        <img src="https://image.plo.vn/w460/Uploaded/2025/yqjvzdjwp/2014_08_01/MPUC20140731161420-logo-xiaomi.jpg.webp" alt="Mascot" className="mx-auto h-20 mb-4" />
                         <p className="text-center text-sm mb-6 text-gray-600">
                             Vui lòng đăng nhập tài khoản để xem ưu đãi và thanh toán dễ dàng hơn. Nếu bạn chưa có tài khoản, đăng ký ngay nhé!
                         </p>

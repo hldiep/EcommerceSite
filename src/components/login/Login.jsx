@@ -1,22 +1,22 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 const Login = () => {
     const navigate = useNavigate();
-    const [phone, setPhone] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const handleLogin = (e) => {
         e.preventDefault();
-        if (phone === '012' && password === 'dcd') {
+        if (username === 'customer' && password === '123123123') {
             const userInfo = {
                 name: 'Hoàng Linh Điệp',
-                phone: phone,
+                username: username,
             };
             localStorage.setItem('user', JSON.stringify(userInfo));
             toast.success('Đăng nhập thành công');
-            navigate('/profile');
+            navigate('/');
         } else {
             toast.error('Sai số điện thoại hoặc mật khẩu');
         }
@@ -44,7 +44,6 @@ const Login = () => {
                 </a>
             </div>
 
-            {/* Right Side - Form */}
             <div className="p-8 flex flex-col justify-center">
                 <h2 className="text-3xl font-bold text-red-600 mb-8 text-center">Đăng nhập</h2>
                 <form onSubmit={handleLogin} className="space-y-6">
@@ -52,8 +51,8 @@ const Login = () => {
                         <label className="block text-sm font-medium text-gray-700">Số điện thoại</label>
                         <input
                             type="text"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
                             className="text-sm mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 outline-none"
                             placeholder="Nhập số điện thoại của bạn"
                             required
@@ -83,7 +82,7 @@ const Login = () => {
                         Đăng nhập
                     </button>
                     <div className="text-center">
-                        <a href="#" className="text-blue-600 font-medium text-sm">Quên mật khẩu?</a>
+                        <a href="/restore-password" className="text-blue-600 font-medium text-sm">Quên mật khẩu?</a>
                     </div>
                 </form>
 
