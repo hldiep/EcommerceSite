@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const initialCart = [
     {
@@ -18,6 +19,7 @@ const initialCart = [
 ];
 
 const Cart = () => {
+    const navigate = useNavigate();
     const [cartItems, setCartItems] = useState(initialCart);
 
     const updateQuantity = (id, delta) => {
@@ -94,6 +96,7 @@ const Cart = () => {
                                     Tạm tính: <span className="text-red-600 font-bold">{total.toLocaleString('vi-VN')}đ</span>
                                 </div>
                                 <button
+                                    onClick={() => navigate('/payment')}
                                     disabled={cartItems.length === 0}
                                     className={`px-6 py-2 rounded font-semibold text-white ${cartItems.length === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
                                 >

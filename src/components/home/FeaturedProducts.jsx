@@ -58,7 +58,7 @@ const formatPrice = (price) => {
 const FeaturedProducts = () => {
     const navigate = useNavigate();
     const handleClick = () => {
-        navigate('/mobile');
+        navigate('/category');
     };
     return (
         <div className="px-4 mt-10">

@@ -1,24 +1,31 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { loginApi } from '../../api/auth';
+import { useAuth } from '../../contexts/AuthContext';
 const Login = () => {
     const navigate = useNavigate();
+    const location = useLocation(); //lấy thông tin trang trước
+    const { login } = useAuth();
+
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        if (username === 'customer' && password === '123123123') {
-            const userInfo = {
-                name: 'Hoàng Linh Điệp',
-                username: username,
-            };
-            localStorage.setItem('user', JSON.stringify(userInfo));
-            toast.success('Đăng nhập thành công');
-            navigate('/');
-        } else {
-            toast.error('Sai số điện thoại hoặc mật khẩu');
+        try {
+            const data = await loginApi(username, password);
+            login(data.user, data.token);
+            toast.success('Đăng nhập thành công!');
+            if (location.state?.from) {
+                navigate(location.state.from);
+            } else {
+                navigate(-1); // Quay lại trang trước
+            }
+        } catch (error) {
+            toast.error(error.message || 'Sai thông tin đăng nhập');
+            console.error('Login error:', error);
         }
     };
 
@@ -53,7 +60,7 @@ const Login = () => {
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="text-sm mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 outline-none"
+                            className="mt-2 w-full border border-gray-300 rounded-md px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-red-400"
                             placeholder="Nhập số điện thoại của bạn"
                             required
                         />
@@ -64,7 +71,7 @@ const Login = () => {
                             type={showPassword ? 'text' : 'password'}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="text-sm mt-1 block w-full border border-gray-300 rounded-md px-4 py-2 pr-10 outline-none"
+                            className="mt-2 w-full border border-gray-300 rounded-md px-4 py-2 pr-10 text-sm outline-none focus:ring-2 focus:ring-red-400"
                             placeholder="Nhập mật khẩu của bạn"
                             required
                         />

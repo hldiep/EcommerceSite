@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaHeart, FaHome, FaStar } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
     MdSportsEsports, MdBatteryFull, MdNetworkCell,
     MdCameraAlt, MdPhoneAndroid, MdLocalOffer
 } from 'react-icons/md';
 import { BiSortUp, BiSortDown } from "react-icons/bi";
+import { fetchCategoryById } from '../../api/categories';
 const brands = [
     { name: "Apple", logo: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" },
     { name: "Samsung", logo: "https://upload.wikimedia.org/wikipedia/commons/2/24/Samsung_Logo.svg" },
@@ -120,8 +121,20 @@ const formatPrice = (price) => {
 };
 const Mobile = () => {
     const navigate = useNavigate();
+    const { id } = useParams();
+    const [category, setCategory] = useState(null);
     const [selected, setSelected] = useState("popular");
-
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const result = await fetchCategoryById(id);
+                setCategory(result);
+            } catch (err) {
+                console.error("Lỗi load danh mục", err);
+            }
+        };
+        fetchData();
+    }, [id]);
     const options = [
         { key: "popular", label: "Phổ biến", icon: <FaStar className="text-blue-600" /> },
         { key: "promo", label: "Khuyến mãi HOT", icon: <MdLocalOffer className="text-black" /> },
@@ -136,7 +149,7 @@ const Mobile = () => {
                     <button onClick={() => navigate('/')}
                         className="text-gray-700">Trang chủ</button>
                     <span className="text-gray-700">/</span>
-                    <span className="text-black font-medium">Điện thoại</span>
+                    <span className="text-black font-medium">{category?.name || "Danh mục"}</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <img

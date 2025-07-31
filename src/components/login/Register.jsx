@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+
 const Register = () => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
@@ -10,6 +11,8 @@ const Register = () => {
         birthday: '',
         phone: '',
         email: '',
+        address: '',           // <-- Thêm địa chỉ
+        username: '',          // <-- Thêm username
         password: '',
         confirmPassword: '',
         subscribe: false,
@@ -28,6 +31,7 @@ const Register = () => {
         console.log("Đăng ký:", form);
         // TODO: Gửi dữ liệu đến backend
     };
+
     return (
         <div className="min-h-screen bg-white flex justify-center">
             <div className='container mt-10 mb-10'>
@@ -36,6 +40,7 @@ const Register = () => {
                     <img src="https://image.plo.vn/w460/Uploaded/2025/yqjvzdjwp/2014_08_01/MPUC20140731161420-logo-xiaomi.jpg.webp" alt="Mascot" className="mx-auto h-36 mb-4 mt-10" />
                 </div>
                 <h2 className='items-center text-center text-gray-600 text-sm'>Hãy điền đầy đủ thông tin đăng ký dưới đây</h2>
+
                 <div className="min-h-screen flex items-center justify-center px-4">
                     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-md max-w-2xl w-full">
                         <h2 className="text-xl font-bold mb-4">Thông tin cá nhân</h2>
@@ -55,12 +60,25 @@ const Register = () => {
                             <div>
                                 <label className="block text-sm font-medium mb-1">Email (Không bắt buộc)</label>
                                 <input type="email" name="email" value={form.email} onChange={handleChange} className="text-sm w-full border rounded px-3 py-2 outline-none" />
-
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-medium mb-1">Địa chỉ (Không bắt buộc)</label>
+                                <input type="text" name="address" value={form.address} onChange={handleChange} className="text-sm w-full border rounded px-3 py-2 outline-none" />
                             </div>
                         </div>
 
-                        <h2 className="text-xl font-bold mt-6 mb-4">Tạo mật khẩu</h2>
+                        <h2 className="text-xl font-bold mt-6 mb-4">Tạo tài khoản & mật khẩu</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Username</label>
+                                <input
+                                    type="text"
+                                    name="username"
+                                    value={form.username}
+                                    onChange={handleChange}
+                                    className="text-sm outline-none w-full border rounded px-3 py-2"
+                                />
+                            </div>
                             <div className="relative">
                                 <label className="block text-sm font-medium mb-1">Mật khẩu</label>
                                 <input
@@ -78,7 +96,7 @@ const Register = () => {
                                 </span>
                                 <p className="text-xs text-gray-500 mt-1">Tối thiểu 6 ký tự, có ít nhất 1 chữ & 1 số</p>
                             </div>
-                            <div className="relative">
+                            <div className="md:col-span-2 relative">
                                 <label className="block text-sm font-medium mb-1">Nhập lại mật khẩu</label>
                                 <input
                                     type={showConfirmPassword ? 'text' : 'password'}
@@ -127,6 +145,6 @@ const Register = () => {
             </div>
         </div>
     )
-}
+};
 
-export default Register
+export default Register;

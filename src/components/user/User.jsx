@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FaClipboardList, FaGem, FaHistory, FaHome, FaLink, FaMapMarkerAlt, FaMedal, FaSearch, FaShoppingCart, FaSignOutAlt, FaTags, FaUserCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -7,12 +7,23 @@ const User = () => {
     const totalOrders = 0;
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState('overview');
     const handleLogout = () => {
-        localStorage.removeItem('user');
-        setUser(null);
-        toast.info('Bạn đã đăng xuất tài khoản');
-        navigate('/login');
+        const confirmed = window.confirm("Bạn có chắc chắn muốn đăng xuất?");
+        if (confirmed) {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            setUser(null);
+            toast.info('Bạn đã đăng xuất tài khoản');
+            navigate('/');
+        }
     };
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
             <div className='container mt-20 mb-10'>
@@ -24,8 +35,8 @@ const User = () => {
                             className="rounded-full w-24 h-24"
                         />
                         <div>
-                            <p className="font-semibold text-lg">Hoàng Linh Điệp</p>
-                            <p className="text-gray-600">0123456789</p>
+                            <p className="font-semibold text-lg">{user?.fullName}</p>
+                            <p className="text-gray-600">{user?.phone}</p>
                         </div>
                     </div>
                     <div className="flex items-center space-x-3 px-6">
@@ -38,70 +49,78 @@ const User = () => {
                         </div>
                     </div>
                 </div>
-                <div className="mt-3 flex space-x-4 justify-center rounded-lg shadow-lg p-4 items-center bg-white text-sm text-gray-700">
-                    <div className="flex flex-row space-x-2 items-center text-center justify-center hover:text-red-600 cursor-pointer">
-                        <FaMedal className="text-xl" />
-                        <span>Hạng thành viên</span>
-                    </div>
-                    <div className="flex flex-row space-x-2 items-center justify-center hover:text-red-600 cursor-pointer">
-                        <FaTags className="text-xl" />
-                        <span>Mã giảm giá</span>
-                    </div>
-                    <div className="flex flex-row space-x-2 items-center justify-center hover:text-red-600 cursor-pointer">
-                        <FaHistory className="text-xl" />
-                        <span>Lịch sử mua hàng</span>
-                    </div>
-                    <div className="flex flex-row space-x-2 items-center justify-center hover:text-red-600 cursor-pointer">
-                        <FaMapMarkerAlt className="text-xl" />
-                        <span>Địa chỉ</span>
-                    </div>
-                    <div className="flex flex-row space-x-2 items-center justify-center hover:text-red-600 cursor-pointer">
-                        <FaLink className="text-xl" />
-                        <span>Liên kết tài khoản</span>
-                    </div>
-                </div>
+
                 <div className='mt-3 flex space-x-4 rounded-lg shadow-lg p-4 bg-white'>
                     <div className="w-full md:w-64 bg-white border-r min-h-screen">
                         <ul className="space-y-1 p-2 text-sm text-gray-700">
-                            <li className="flex items-center space-x-2 py-2 hover:bg-gray-100 rounded">
+                            <li
+                                onClick={() => setActiveTab('overview')}
+                                className={`flex items-center space-x-2 py-2 px-2 rounded cursor-pointer ${activeTab === 'overview' ? 'bg-red-100 text-red-600 font-semibold' : 'hover:bg-gray-100 text-gray-700'
+                                    }`}
+                            >
                                 <FaHome />
                                 <span>Tổng quan</span>
                             </li>
-                            <li className="flex items-center space-x-2 py-2 hover:bg-gray-100 rounded">
+                            <li
+                                onClick={() => setActiveTab('history')}
+                                className={`flex items-center space-x-2 py-2 px-2 rounded cursor-pointer ${activeTab === 'history' ? 'bg-red-100 text-red-600 font-semibold' : 'hover:bg-gray-100 text-gray-700'
+                                    }`}
+                            >
                                 <FaHistory />
                                 <span>Lịch sử mua hàng</span>
                             </li>
-                            <li className="flex items-center space-x-2 py-2 hover:bg-gray-100 rounded">
-                                <FaGem />
-                                <span>Hạng thành viên và ưu đãi</span>
-                            </li>
-                            <li className="flex items-center space-x-2 py-2 hover:bg-gray-100 rounded">
+
+                            <li
+                                onClick={() => setActiveTab('account')}
+                                className={`flex items-center space-x-2 py-2 px-2 rounded cursor-pointer ${activeTab === 'account' ? 'bg-red-100 text-red-600 font-semibold' : 'hover:bg-gray-100 text-gray-700'
+                                    }`}
+                            >
                                 <FaUserCircle />
                                 <span>Thông tin tài khoản</span>
                             </li>
-                            <li className="flex items-center space-x-2 py-2 hover:bg-gray-100 rounded">
-                                <FaSearch />
-                                <span>Tìm kiếm cửa hàng</span>
-                            </li>
-                            <li className="flex items-center space-x-2 py-2 hover:bg-gray-100 rounded">
-                                <FaClipboardList />
-                                <span>Chính sách bảo hành</span>
-                            </li>
+
                             <li
                                 onClick={handleLogout}
-                                className="flex items-center space-x-2 py-2 hover:bg-gray-100 rounded cursor-pointer text-red-600 font-medium mt-4"
+                                className="flex items-center space-x-2 py-2 px-2 hover:bg-gray-100 rounded cursor-pointer text-red-600 font-medium mt-4"
                             >
                                 <FaSignOutAlt />
                                 <span>Đăng xuất</span>
                             </li>
                         </ul>
                     </div>
-                    <div className='w-2/3 border-r'>
-                        <span className='font-semibold'>Đơn hàng gần đây</span>
+                    <div className='w-2/3'>
+                        {activeTab === 'overview' && (
+                            <div>
+                                <h2 className="font-semibold text-lg mb-3">Đơn hàng gần đây</h2>
+                                <p className='text-sm text-gray-500'>Hiện bạn chưa có đơn hàng nào.</p>
+                            </div>
+                        )}
+
+                        {activeTab === 'history' && (
+                            <div>
+                                <h2 className="font-semibold text-lg mb-3">Lịch sử mua hàng</h2>
+                                <p className='text-sm text-gray-500'>Chức năng đang được phát triển.</p>
+                            </div>
+                        )}
+
+                        {activeTab === 'account' && user && (
+                            <div>
+                                <h2 className="font-semibold text-lg mb-3">Thông tin tài khoản</h2>
+                                <div className='space-y-2'>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div><span className="font-medium">Họ tên:</span> {user.fullName}</div>
+                                        <div><span className="font-medium">Số điện thoại:</span> {user.phone}</div>
+                                        <div><span className="font-medium">Email:</span> {user.email}</div>
+                                        <div><span className="font-medium">Giới tính:</span> {user.gender}</div>
+                                        <div><span className="font-medium">Ngày sinh:</span> {user.birthday}</div>
+                                        <div><span className="font-medium">Địa chỉ:</span> {user.address}</div>
+                                        <div><span className="font-medium">Vai trò:</span> {user.role}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    <div className='w-1/3'>
-                        <span className='font-semibold'>Ưu đãi của bạn</span>
-                    </div>
+
                 </div>
 
             </div>
