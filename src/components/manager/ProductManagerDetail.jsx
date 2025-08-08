@@ -42,6 +42,7 @@ const ProductManagerDetail = () => {
                         <h2 className="text-xl font-semibold p-4">{product.name}</h2>
                     )}
                 </div>
+
                 {loading ? (
                     <div className="flex justify-center items-center py-10">
                         <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-r-transparent"></div>
@@ -49,6 +50,12 @@ const ProductManagerDetail = () => {
                     </div>
                 ) : (
                     <div className="p-6 max-w-4xl mx-auto space-y-4">
+                        <button
+                            onClick={() => navigate(-1)}
+                            className=" px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                        >
+                            ← Quay lại
+                        </button>
                         <img src={product.imageUrl} alt={product.name} className="w-64" />
 
                         <div className=" p-4 rounded">

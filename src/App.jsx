@@ -28,6 +28,9 @@ import SlideManager from './components/manager/SlideManager'
 import ProductCompare from './components/product/ProductCompare'
 import Category from './components/category/Category'
 import VerifyOtp from './components/login/VerifyOtp'
+import PaymentSuccess from './components/cart/PaymentSuccess'
+import OrderManager from './components/manager/OrderManager'
+import OrderManagerDetailPage from './components/manager/OrderManagerDetailPage'
 function App() {
 
   return (
@@ -54,6 +57,7 @@ function App() {
           <Route path="cart" element={<Cart />} />
           <Route path="payment-info" element={<InfoPayment />} />
           <Route path="payment-continue" element={<PaymentPage />} />
+          <Route path="payment-success" element={<PaymentSuccess />} />
         </Route>
 
         <Route path='/tongquan' element={<Tongquan />} />
@@ -64,6 +68,8 @@ function App() {
         <Route path="products-manager/slide" element={<SlideManager />} />
         <Route path="products-manager/:id" element={<ProductManagerDetail />} />
         <Route path="discount-manager" element={<DiscountManager />} />
+        <Route path="order-manager" element={<OrderManager />} />
+        <Route path="order-manager/:id" element={<OrderManagerDetailPage />} />
       </Routes>
       <ScrollToTopButton />
 

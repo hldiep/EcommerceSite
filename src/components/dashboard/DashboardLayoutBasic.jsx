@@ -33,7 +33,7 @@ export default function ClippedDrawer({ children }) {
     { text: 'Sản phẩm', icon: <InventoryIcon />, path: '/products-manager' },
     { text: 'Danh mục', icon: <CategoryIcon />, path: '/categories-manager' },
     { text: 'Thương hiệu', icon: <BrandingWatermarkIcon />, path: '/brands-manager' },
-    { text: 'Đơn hàng', icon: <ShoppingCartIcon />, path: '/orders' },
+    { text: 'Đơn hàng', icon: <ShoppingCartIcon />, path: '/order-manager' },
     { text: 'Khách hàng', icon: <PeopleIcon />, path: '/customers' },
     { text: 'Mã giảm giá', icon: <DiscountIcon />, path: '/discount-manager' },
     { text: 'Thống kê', icon: <BarChartIcon />, path: '/analytics' },

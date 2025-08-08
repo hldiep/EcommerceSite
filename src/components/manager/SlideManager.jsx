@@ -5,6 +5,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { toast } from 'react-toastify';
 import { createSlides, fetchSlidesWithPaging, updateSlidesById } from '../../api/slide';
+import { upload } from '../../api/upload-file';
 const SlideManager = () => {
     const navigate = useNavigate();
     const [slides, setSlides] = useState([]);
@@ -12,6 +13,9 @@ const SlideManager = () => {
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
+
+    const [isUploading, setIsUploading] = useState(false);
+    const [error, setError] = useState('');
 
     const [sortBy, setSortBy] = useState('id');
     const [direction, setDirection] = useState('asc');
@@ -53,11 +57,11 @@ const SlideManager = () => {
     const handleEditClick = (slide) => {
         setEditingSlide(slide);
         setEditForm({
-            name: option.name || '',
-            imageUrl: option.imageUrl || '',
-            link: option.link || '',
-            description: option.description || '',
-            status: option.status || 'ACTIVE',
+            name: slide.name || '',
+            imageUrl: slide.imageUrl || '',
+            link: slide.link || '',
+            description: slide.description || '',
+            status: slide.status || 'ACTIVE',
         });
     };
     const handleSubmit = async () => {
@@ -65,7 +69,15 @@ const SlideManager = () => {
             const payload = {
                 ...editForm,
             };
-
+            console.log("Payload gửi đi:", payload);
+            if (!editForm.name.trim()) {
+                toast.error("Vui lòng nhập tiêu đề!");
+                return;
+            }
+            if (!editForm.link.trim()) {
+                toast.error("Vui lòng nhập link!");
+                return;
+            }
             if (editingSlide?.id) {
                 await updateSlidesById(editingSlide.id, payload);
                 toast.success('Cập nhật thành công!');
@@ -99,6 +111,31 @@ const SlideManager = () => {
         setDirection(e.target.value);
         setPage(0); // về trang đầu
     };
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setIsUploading(true);
+
+        try {
+            const imageUrl = await upload(file);
+            console.log("Link ảnh trả về từ upload:", imageUrl);
+
+            setEditForm((prev) => ({
+                ...prev,
+                imageUrl: imageUrl,
+            }));
+
+            setError('');
+        } catch (err) {
+            console.error("Lỗi upload ảnh:", err);
+            setError("Không thể tải ảnh lên. Vui lòng thử lại.");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     return (
         <ClippedDrawer>
             <div className="p-6 max-w-7xl mx-auto space-y-6 bg-gray-50 min-h-[calc(100vh-80px)]">
@@ -159,7 +196,8 @@ const SlideManager = () => {
                             setEditForm({
                                 name: '',
                                 description: '',
-                                logoUrl: '',
+                                imageUrl: '',
+                                link: '',
                                 status: 'ACTIVE',
                             });
                             setEditingSlide({});
@@ -178,14 +216,12 @@ const SlideManager = () => {
                 ) : (
                     <table className="w-full table-auto bg-white shadow rounded">
                         <thead className="bg-gray-100">
-                            <thead>
-                                <tr className="text-left">
-                                    <th className="p-3">Name</th>
-                                    <th className="p-3">Image</th>
-                                    <th className="p-3">Link</th>
-                                    <th className="p-3">Description</th>
-                                </tr>
-                            </thead>
+                            <tr className="text-left">
+                                <th className="p-3">Name</th>
+                                <th className="p-3">Image</th>
+                                <th className="p-3">Link</th>
+                                <th className="p-3">Description</th>
+                            </tr>
                         </thead>
                         <tbody>
                             {slides.length === 0 ? (
@@ -271,14 +307,42 @@ const SlideManager = () => {
                                                 placeholder="Name"
                                             />
                                         </div>
-
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">LocalName</label>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Thêm ảnh</label>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
+               file:rounded file:border-0 file:text-sm file:font-semibold
+               file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                            />
+                                            {isUploading && (
+                                                <p className="text-blue-600 text-sm mt-1">Đang tải ảnh lên...</p>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Link</label>
                                             <input
                                                 className="border px-3 py-2 rounded w-full outline-none"
-                                                value={editForm.localName}
-                                                onChange={(e) => setEditForm({ ...editForm, localName: e.target.value })}
-                                                placeholder="LocalName"
+                                                value={editForm.link}
+                                                onChange={(e) => setEditForm({ ...editForm, link: e.target.value })}
+                                                placeholder="Link"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
+                                            <textarea
+                                                rows={3}
+                                                className="border px-3 py-2 rounded w-full outline-none"
+                                                value={editForm.description}
+                                                onChange={(e) =>
+                                                    setEditForm({
+                                                        ...editForm,
+                                                        description: e.target.value,
+                                                    })
+                                                }
+                                                placeholder="Nhập mô tả chi tiết tại đây"
                                             />
                                         </div>
                                         <div>

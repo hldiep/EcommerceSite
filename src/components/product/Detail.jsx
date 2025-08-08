@@ -134,7 +134,7 @@ const Detail = () => {
     };
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
-            <div className='container mt-20 mb-10'>
+            <div className='container mt-28 mb-10'>
                 <div className="flex items-center text-sm text-gray-700 mb-4 gap-2">
                     <FaHome className="text-gray-400" />
                     <button onClick={() => navigate('/')}

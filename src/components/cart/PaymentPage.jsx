@@ -38,15 +38,19 @@ const PaymentPage = () => {
     const finalAmount = totalPrice - discountAmount + shipFee;
 
     const handlePayment = async () => {
-        const items = products.map((item) => ({
-            productVariantId: item.productVariantId,
-            quantity: item.quantity,
-            discountCode: coupon || ""
-        }));
-
+        const items = products.map((item) => {
+            const obj = {
+                productVariantId: item.productVariantId,
+                quantity: item.quantity,
+            };
+            if (coupon.trim()) {
+                obj.discountCode = coupon.trim();
+            }
+            return obj;
+        });
+        console.log("Items gửi lên:", items);
         const finalOrderData = {
             items,
-            discountCode: coupon || "",
             orderTime: new Date().toISOString(),
             note: orderData.note || "",
             deliveryAddress: orderData.deliveryAddress,
@@ -56,6 +60,9 @@ const PaymentPage = () => {
                 method: selectedPaymentMethod,
             },
         };
+        if (coupon.trim()) {
+            finalOrderData.discountCode = coupon.trim();
+        }
 
         try {
             const data = await addOrder(finalOrderData);
@@ -159,9 +166,9 @@ const PaymentPage = () => {
                                 <input
                                     type="radio"
                                     name="payment"
-                                    value="BANK"
-                                    checked={selectedPaymentMethod === 'BANK'}
-                                    onChange={() => setSelectedPaymentMethod('BANK')}
+                                    value="CREDIT_CARD"
+                                    checked={selectedPaymentMethod === 'CREDIT_CARD'}
+                                    onChange={() => setSelectedPaymentMethod('CREDIT_CARD')}
                                 />
                                 <span>Chuyển khoản ngân hàng</span>
                             </label>
@@ -194,13 +201,6 @@ const PaymentPage = () => {
                         </div>
                     </div>
 
-                    <div className="mt-4 mb-4">
-                        <label className="inline-flex items-center text-sm text-gray-700">
-                            <input type="checkbox" className="form-checkbox h-4 w-4 text-red-600" />
-                            <span className="ml-2">Bằng việc Đặt hàng, bạn đồng ý với Điều khoản sử dụng của chúng tôi.</span>
-                        </label>
-                    </div>
-
                     <div className="bg-white rounded-lg shadow p-4 sticky bottom-0">
                         <div className="flex justify-between font-semibold text-lg">
                             <span>Tổng tiền tạm tính:</span>
@@ -210,7 +210,7 @@ const PaymentPage = () => {
                             className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white py-3 rounded text-base font-semibold"
                             onClick={handlePayment}
                         >
-                            Thanh toán
+                            Đặt hàng
                         </button>
                     </div>
                 </div>

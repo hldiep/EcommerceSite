@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft } from 'react-icons/fa';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 const HCM_LOCATIONS = {
     "Quận 1": ["Phường Bến Nghé", "Phường Bến Thành", "Phường Nguyễn Thái Bình"],
     "Thủ Đức": ["Phường Linh Trung", "Phường Linh Đông", "Phường Hiệp Bình Chánh"],
@@ -46,6 +47,15 @@ const InfoPayment = () => {
         deliveryAddress: "",
         note: "",
     });
+    useEffect(() => {
+        if (user) {
+            setFormData(prev => ({
+                ...prev,
+                recipientName: user.fullName || user.name || '',
+                recipientPhone: user.phone || ''
+            }));
+        }
+    }, [user]);
     const [districtOptions, setDistrictOptions] = useState([]);
     const [wardOptions, setWardOptions] = useState([]);
     useEffect(() => {
@@ -54,7 +64,9 @@ const InfoPayment = () => {
         } else {
             setDistrictOptions([]);
         }
-        setFormData((prev) => ({ ...prev, district: "", ward: "" }));
+        setFormData((prev) => ({
+            ...prev, district: "", ward: ""
+        }));
         setWardOptions([]);
     }, [formData.city]);
     useEffect(() => {
@@ -75,7 +87,17 @@ const InfoPayment = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
+        if (
+            !formData.recipientName.trim() ||
+            !formData.recipientPhone.trim() ||
+            !formData.city.trim() ||
+            !formData.district.trim() ||
+            !formData.ward.trim() ||
+            !formData.address.trim()
+        ) {
+            toast.error("Vui lòng nhập đầy đủ thông tin nhận hàng!");
+            return;
+        }
         const items = products.map((item) => ({
             productVariantId: item.productVariantId,
             quantity: item.quantity,
@@ -137,15 +159,12 @@ const InfoPayment = () => {
                         <h3 className="font-semibold mb-2 text-gray-700">THÔNG TIN KHÁCH HÀNG</h3>
                         <div className="space-y-1">
                             <div className="flex items-center justify-between">
-                                <span className="font-medium">{user.recipientName || user.name}</span>
-                                <span className="bg-pink-200 text-pink-600 text-xs px-2 py-1 rounded-full">
-                                    {user.gender || 'S-NULL'}
-                                </span>
+                                <span className="font-medium">{user.fullName}</span>
                             </div>
                             <p className="text-sm text-gray-500">EMAIL</p>
                             <p>{user.email}</p>
                             <p className="text-sm text-gray-500 mt-2">SỐ ĐIỆN THOẠI</p>
-                            <p>{user.recipientPhone}</p>
+                            <p>{user.phone}</p>
                         </div>
                         <p className="text-xs text-gray-400 mt-2">(*) Hóa đơn VAT sẽ được gửi qua email này</p>
                     </div>

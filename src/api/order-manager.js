@@ -1,6 +1,5 @@
-const API_URL = `/api/v1/m/options`;
-
-export const fetchOptionsWithPaging = async ({
+const API_URL = `/api/v1/m/orders`;
+export const getOrder = async ({
     page = 0,
     size = 10,
     search = '',
@@ -34,60 +33,12 @@ export const fetchOptionsWithPaging = async ({
         const json = await response.json();
         return json.data;
     } catch (error) {
-        console.error("Lỗi khi fetch option:", error);
+        console.error("Lỗi khi fetch history order:", error);
         throw error;
     }
-};
-export const updateOptionById = async (id, payload) => {
-    try {
-        const token = localStorage.getItem('MANAGER_token');
-        const response = await fetch(`API_URL/update/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-        });
+}
 
-        if (!response.ok) {
-            throw new Error(await response.text());
-        }
-
-        const json = await response.json();
-        return json.data;
-    } catch (err) {
-        console.error('Lỗi update option:', err);
-        throw err;
-    }
-};
-export const createOption = async (payload) => {
-    try {
-        const token = localStorage.getItem('MANAGER_token');
-
-        const response = await fetch('{API_URL}/add', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'Accept': '*/*',
-            },
-            body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText || 'Tạo option thất bại');
-        }
-
-        const json = await response.json();
-        return json.data;
-    } catch (err) {
-        console.error('Lỗi tạo supplier:', err);
-        throw err;
-    }
-};
-export const fetchOptionById = async (id) => {
+export const getOrderById = async (id) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
         const response = await fetch(`${API_URL}/${id}`, {
@@ -99,7 +50,7 @@ export const fetchOptionById = async (id) => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(errorText || 'Không tìm thấy option');
+            throw new Error(errorText || 'Không tìm thấy đơn hàng');
         }
         const json = await response.json();
         return json.data;
@@ -108,16 +59,20 @@ export const fetchOptionById = async (id) => {
         throw new Error(error.message || 'Đã xảy ra lỗi khi lấy thông tin');
     }
 };
-export const changeOptionStatus = async (id, status) => {
+
+export const changeOrderStatus = async (id, status) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
-        const response = await fetch(`/change-status/${id}?status=${status}`, {
-            method: 'PATCH',
-            headers: {
-                'Accept': '*/*',
-                'Authorization': `Bearer ${token}`,
-            },
-        });
+        const response = await fetch(
+            `${API_URL}/change-status/${id}?status=${status}`,
+            {
+                method: 'PATCH',
+                headers: {
+                    'Accept': '*/*',
+                    'Authorization': `Bearer ${token}`,
+                },
+            }
+        );
 
         if (!response.ok) {
             const errorText = await response.text();

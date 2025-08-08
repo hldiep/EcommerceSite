@@ -41,7 +41,7 @@ export const fetchSlidesWithPaging = async ({
 export const updateSlidesById = async (id, payload) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
-        const response = await fetch(`/update/${id}`, {
+        const response = await fetch(`${API_URL}/update/${id}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -61,11 +61,11 @@ export const updateSlidesById = async (id, payload) => {
         throw err;
     }
 };
+
 export const createSlides = async (payload) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
-
-        const response = await fetch('/add', {
+        const response = await fetch(`${API_URL}/add`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,

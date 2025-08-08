@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { FaHistory, FaHome, FaShoppingCart, FaSignOutAlt, FaTags, FaUserCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { getHistory } from '../../api/order';
 
 const User = () => {
     const totalOrders = 0;
@@ -10,6 +11,8 @@ const User = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [orderHistory, setOrderHistory] = useState([]);
     const [recentOrders, setRecentOrders] = useState([]);
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     const handleLogout = () => {
         const confirmed = window.confirm("Bạn có chắc chắn muốn đăng xuất?");
         if (confirmed) {
@@ -21,34 +24,25 @@ const User = () => {
         }
     };
     useEffect(() => {
+        loadHistory();
+    }, [page]);
+    const loadHistory = async () => {
+        try {
+            const data = await getHistory({
+                page,
+            });
+            setOrderHistory(data.data);
+            setTotalPages(data.totalPages);
+        } catch (error) {
+            console.error('Lỗi tải lịch sử mua hàng:', error);
+        }
+    }
+    useEffect(() => {
         const storedUser = localStorage.getItem('CUSTOMER_user');
         if (storedUser) {
             setUser(JSON.parse(storedUser));
         }
 
-        const fakeOrders = [
-            {
-                id: 'DH001',
-                date: '2025-07-15',
-                total: 1250000,
-                status: 'Đã giao',
-            },
-            {
-                id: 'DH002',
-                date: '2025-06-28',
-                total: 820000,
-                status: 'Đang xử lý',
-            },
-            {
-                id: 'DH003',
-                date: '2025-06-20',
-                total: 460000,
-                status: 'Đã hủy',
-            },
-        ];
-
-        setOrderHistory(fakeOrders);
-        setRecentOrders(fakeOrders.slice(0, 3));
     }, []);
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
@@ -121,10 +115,9 @@ const User = () => {
 
                                 <div className="mb-5">
                                     <p className="text-gray-700 text-sm">Xin chào, <span className="font-medium">{user?.fullName}</span>!</p>
-                                    <p className="text-gray-500 text-sm">Dưới đây là 3 đơn hàng gần nhất của bạn.</p>
                                 </div>
 
-                                {recentOrders.length === 0 ? (
+                                {orderHistory.length === 0 ? (
                                     <p className="text-sm text-gray-500">Bạn chưa có đơn hàng nào.</p>
                                 ) : (
                                     <div className="overflow-x-auto">
@@ -138,7 +131,7 @@ const User = () => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {recentOrders.map(order => (
+                                                {orderHistory.map(order => (
                                                     <tr key={order.id} className="hover:bg-gray-50">
                                                         <td className="px-4 py-2 border">{order.id}</td>
                                                         <td className="px-4 py-2 border">{order.date}</td>
