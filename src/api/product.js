@@ -13,7 +13,7 @@ export const fetchProductsWithPaging = async ({
     direction,
 }) => {
     const params = new URLSearchParams();
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('MANAGER_token');
     if (!token) {
         throw new Error('Token không tồn tại. Vui lòng đăng nhập lại.');
     }
@@ -55,7 +55,7 @@ export const fetchProductsWithPaging = async ({
 
 export const fetchProductById = async (id) => {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('MANAGER_token');
         if (!token) {
             throw new Error('Token không tồn tại. Vui lòng đăng nhập lại.');
         }
@@ -129,6 +129,40 @@ export const fetchProductsPublicWithPaging = async ({
     }
 };
 
+export const fetchProductByCategory = async (
+    categoryId,
+    page = 0,
+    size = 20,
+    sortBy = 'id',
+    direction = 'asc',
+) => {
+    try {
+        const url = new URL(`/api/v1/products/by-category/${categoryId}/page`, window.location.origin);
+        url.searchParams.append('page', page);
+        url.searchParams.append('size', size);
+        url.searchParams.append('sortBy', sortBy);
+        url.searchParams.append('direction', direction);
+        const response = await fetch(url,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+        if (!response.ok) {
+            const err = await response.text();
+            throw new Error(err || `Lỗi ${response.status}`);
+        }
+
+        const json = await response.json();
+        return json.data;
+    } catch (error) {
+        console.error('Failed to fetch products by category:', error);
+        throw error;
+    }
+};
+
 export const fetchProductPublicById = async (id) => {
     try {
         const response = await fetch(`/api/v1/products/${id}`, {
@@ -147,6 +181,28 @@ export const fetchProductPublicById = async (id) => {
         return json.data;
     } catch (error) {
         console.error("Lỗi fetchProductById:", error.message);
+        throw error;
+    }
+};
+export const changeProductStatus = async (id, status) => {
+    try {
+        const token = localStorage.getItem('MANAGER_token');
+        const response = await fetch(`/change-status/${id}?status=${status}`, {
+            method: 'PATCH',
+            headers: {
+                'Accept': '*/*',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Không thể thay đổi trạng thái sản phẩm');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Lỗi khi thay đổi trạng thái:', error);
         throw error;
     }
 };

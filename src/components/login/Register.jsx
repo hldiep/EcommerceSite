@@ -1,21 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { toast } from 'react-toastify';
+import { sendOtpRegister } from '../../api/auth';
 
 const Register = () => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [form, setForm] = useState({
-        name: '',
+        fullName: '',
         birthday: '',
         phone: '',
         email: '',
-        address: '',           // <-- Thêm địa chỉ
-        username: '',          // <-- Thêm username
+        address: '',
+        username: '',
         password: '',
         confirmPassword: '',
-        subscribe: false,
+        gender: 'Nam',
     });
 
     const handleChange = (e) => {
@@ -26,10 +29,41 @@ const Register = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Đăng ký:", form);
-        // TODO: Gửi dữ liệu đến backend
+        const {
+            fullName, birthday, phone, email, username,
+            password, confirmPassword
+        } = form;
+
+        if (!fullName || !birthday || !phone || !email || !username || !password || !confirmPassword) {
+            toast.error("Vui lòng điền đầy đủ các trường bắt buộc.");
+            return;
+        }
+        if (username.length < 8) {
+            toast.error("Tên đăng nhập phải có ít nhất 8 ký tự.");
+            return;
+        }
+        if (password.length < 6 || !/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
+            toast.error("Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ và số.");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            toast.error("Mật khẩu nhập lại không khớp.");
+            return;
+        }
+        setIsLoading(true);
+        try {
+            await sendOtpRegister(form);
+            toast.success("OTP đã được gửi tới email!");
+
+            navigate("/register/verify-otp", { state: { formData: form } });
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Lỗi khi gửi OTP.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -47,22 +81,49 @@ const Register = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium mb-1">Họ và tên</label>
-                                <input type="text" name="name" value={form.name} onChange={handleChange} className="text-sm w-full border rounded px-3 py-2 outline-none" />
+                                <input type="text" name="fullName" value={form.fullName} onChange={handleChange} className="text-sm w-full border rounded px-3 py-2 outline-none" />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-1">Ngày sinh</label>
                                 <input type="date" name="birthday" value={form.birthday} onChange={handleChange} className="text-sm w-full border rounded px-3 py-2 outline-none" />
                             </div>
                             <div>
+                                <label className="block text-sm font-medium mb-1">Giới tính</label>
+                                <div className="flex gap-4 mt-2">
+                                    <label className="flex items-center text-sm">
+                                        <input
+                                            type="radio"
+                                            name="gender"
+                                            value="Nam"
+                                            checked={form.gender === 'Nam'}
+                                            onChange={handleChange}
+                                            className="mr-2"
+                                        />
+                                        Nam
+                                    </label>
+                                    <label className="flex items-center text-sm">
+                                        <input
+                                            type="radio"
+                                            name="gender"
+                                            value="Nu"
+                                            checked={form.gender === 'Nu'}
+                                            onChange={handleChange}
+                                            className="mr-2"
+                                        />
+                                        Nữ
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
                                 <label className="block text-sm font-medium mb-1">Số điện thoại</label>
                                 <input type="tel" name="phone" value={form.phone} onChange={handleChange} className="text-sm w-full border rounded px-3 py-2 outline-none" />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Email (Không bắt buộc)</label>
-                                <input type="email" name="email" value={form.email} onChange={handleChange} className="text-sm w-full border rounded px-3 py-2 outline-none" />
-                            </div>
                             <div className="md:col-span-2">
-                                <label className="block text-sm font-medium mb-1">Địa chỉ (Không bắt buộc)</label>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Email (Bắt buộc)</label>
+                                    <input type="email" name="email" value={form.email} onChange={handleChange} className="text-sm w-full border rounded px-3 py-2 outline-none" />
+                                </div>
+                                <label className="block text-sm font-medium mb-1 mt-2">Địa chỉ (Không bắt buộc)</label>
                                 <input type="text" name="address" value={form.address} onChange={handleChange} className="text-sm w-full border rounded px-3 py-2 outline-none" />
                             </div>
                         </div>
@@ -114,17 +175,6 @@ const Register = () => {
                             </div>
                         </div>
 
-                        <div className="mt-4 flex items-center">
-                            <input type="checkbox" name="subscribe" checked={form.subscribe} onChange={handleChange} className="mr-2" />
-                            <span className="text-sm">Đăng ký nhận tin khuyến mãi từ chúng tôi</span>
-                        </div>
-
-                        <p className="text-xs text-gray-500 mt-3">
-                            Bằng việc đăng ký, bạn đã đồng ý với{' '}
-                            <a href="#" className="text-blue-600 font-medium underline">Điều khoản sử dụng</a> và{' '}
-                            <a href="#" className="text-blue-600 font-medium underline">Chính sách bảo mật</a>
-                        </p>
-
                         <div className="flex mt-6 gap-4">
                             <button
                                 type="button"
@@ -135,9 +185,11 @@ const Register = () => {
                             </button>
                             <button
                                 type="submit"
-                                className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                                disabled={isLoading}
+                                className={`flex-1 py-2 rounded-lg text-white transition ${isLoading ? 'bg-red-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
+                                    }`}
                             >
-                                Hoàn tất đăng ký
+                                {isLoading ? 'Đang xử lý...' : 'Hoàn tất đăng ký'}
                             </button>
                         </div>
                     </form>

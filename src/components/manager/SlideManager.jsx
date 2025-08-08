@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { toast } from 'react-toastify';
-import { createBrand, fetchBrandsWithPaging, updateBrandById } from '../../api/brand';
-const BrandManager = () => {
+import { createSlides, fetchSlidesWithPaging, updateSlidesById } from '../../api/slide';
+const SlideManager = () => {
     const navigate = useNavigate();
-    const [brands, setBrands] = useState([]);
+    const [slides, setSlides] = useState([]);
     const [keyword, setKeyword] = useState('');
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -15,47 +15,49 @@ const BrandManager = () => {
 
     const [sortBy, setSortBy] = useState('id');
     const [direction, setDirection] = useState('asc');
-    const [editingBrand, setEditingBrand] = useState(null);
+    const [editingSlide, setEditingSlide] = useState(null);
     const [editForm, setEditForm] = useState({
         name: '',
+        imageUrl: '',
+        link: '',
         description: '',
-        logoUrl: '',
         status: 'ACTIVE',
     });
 
     useEffect(() => {
-        loadBrands();
+        loadSlide();
     }, [page, sortBy, direction]);
-    const loadBrands = async () => {
+    const loadSlide = async () => {
         setLoading(true);
         try {
-            const data = await fetchBrandsWithPaging({
+            const data = await fetchSlidesWithPaging({
                 page,
                 size: 10,
                 search: keyword,
                 sortBy,
                 direction,
             });
-            setBrands(data.data);
+            setSlides(data.data);
             setTotalPages(data.totalPages);
         } catch (error) {
-            console.error('Lỗi tải danh mục:', error);
+            console.error('Lỗi tải slide:', error);
         } finally {
             setLoading(false);
         }
     };
     const handleSearch = () => {
         setPage(0);
-        loadBrands();
+        loadSlide();
     };
 
-    const handleEditClick = (brand) => {
-        setEditingBrand(brand);
+    const handleEditClick = (slide) => {
+        setEditingSlide(slide);
         setEditForm({
-            name: brand.name || '',
-            description: brand.description || '',
-            logoUrl: brand.logoUrl || '',
-            status: brand.status || 'ACTIVE',
+            name: option.name || '',
+            imageUrl: option.imageUrl || '',
+            link: option.link || '',
+            description: option.description || '',
+            status: option.status || 'ACTIVE',
         });
     };
     const handleSubmit = async () => {
@@ -64,27 +66,27 @@ const BrandManager = () => {
                 ...editForm,
             };
 
-            if (editingBrand?.id) {
-                await updateBrandById(editingBrand.id, payload);
+            if (editingSlide?.id) {
+                await updateSlidesById(editingSlide.id, payload);
                 toast.success('Cập nhật thành công!');
             } else {
-                await createBrand(payload);
+                await createSlides(payload);
                 toast.success('Tạo mới thành công!');
             }
 
-            setEditingBrand(null);
-            loadBrands();
+            setEditingSlide(null);
+            loadSlide();
         } catch (error) {
             console.log('Lỗi:', error.message);
             try {
                 const { data } = JSON.parse(error.message);
-                if (data?.name || data?.seoName) {
-                    toast.error(`${data.name || ''} ${data.seoName || ''}`);
+                if (data?.name) {
+                    toast.error(`${data.name || ''}`);
                 } else {
-                    toast.error('Thao tác thất bại');
+                    toast.error('Thao tác thất bại. Vui lòng kiểm tra đầy đủ thông tin');
                 }
             } catch {
-                toast.error('Thao tác thất bại');
+                toast.error('Thao tác thất bại. Vui lòng kiểm tra đầy đủ thông tin');
             }
         }
     };
@@ -107,9 +109,13 @@ const BrandManager = () => {
                             Dashboard
                         </button>
                         <span>/</span>
-                        <span className="text-gray-700 font-medium">Quản lý danh mục sản phẩm</span>
+                        <button onClick={() => navigate('/products-manager')} className="hover:underline text-blue-600">
+                            Quản lý sản phẩm
+                        </button>
+                        <span>/</span>
+                        <span className="text-gray-700 font-medium">Quản lý slide</span>
                     </div>
-                    <h2 className="text-xl font-semibold p-4">Quản lý danh mục</h2>
+                    <h2 className="text-xl font-semibold p-4">Quản lý slide</h2>
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -156,7 +162,7 @@ const BrandManager = () => {
                                 logoUrl: '',
                                 status: 'ACTIVE',
                             });
-                            setEditingBrand({});
+                            setEditingSlide({});
                         }}
                         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded ml-2"
                     >
@@ -172,15 +178,17 @@ const BrandManager = () => {
                 ) : (
                     <table className="w-full table-auto bg-white shadow rounded">
                         <thead className="bg-gray-100">
-                            <tr className="text-left">
-                                <th className="p-3">ID</th>
-                                <th className="p-3">Logo</th>
-                                <th className="p-3">Tên thương hiệu</th>
-                                <th className="p-3">Mô tả</th>
-                            </tr>
+                            <thead>
+                                <tr className="text-left">
+                                    <th className="p-3">Name</th>
+                                    <th className="p-3">Image</th>
+                                    <th className="p-3">Link</th>
+                                    <th className="p-3">Description</th>
+                                </tr>
+                            </thead>
                         </thead>
                         <tbody>
-                            {brands.length === 0 ? (
+                            {slides.length === 0 ? (
                                 <tr>
                                     <td colSpan="3" className="text-center py-6">
                                         <div className="flex flex-col items-center justify-center space-y-2">
@@ -194,26 +202,30 @@ const BrandManager = () => {
                                     </td>
                                 </tr>
                             ) : (
-                                brands.map((item) => (
+                                slides.map((item) => (
                                     <tr
                                         key={item.id}
                                         className="border-t hover:bg-blue-50 cursor-pointer"
                                         onClick={() => handleEditClick(item)}
                                     >
-                                        <td className="p-3">{item.id}</td>
-                                        <td className="p-3">
-                                            <img src={item.logoUrl} alt={item.name} className="h-10 w-auto object-contain" />
-                                        </td>
                                         <td className="p-3">{item.name}</td>
-                                        <td className="p-3">{item.description || '-'}</td>
+                                        <td className="p-3">
+                                            <img src={item.imageUrl} alt="slide" className="w-20 h-14 object-cover rounded" />
+                                        </td>
+                                        <td className="p-3">
+                                            <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+                                                {item.link}
+                                            </a>
+                                        </td>
+                                        <td className="p-3">{item.description}</td>
                                     </tr>
                                 ))
                             )}
                         </tbody>
                     </table>
                 )}
-                <Transition.Root show={!!editingBrand} as={Fragment}>
-                    <Dialog as="div" className="fixed inset-0 z-[9999]" onClose={() => setEditingBrand(null)}>
+                <Transition.Root show={!!editingSlide} as={Fragment}>
+                    <Dialog as="div" className="fixed inset-0 z-[9999]" onClose={() => setEditingSlide(null)}>
                         <Transition.Child
                             as={Fragment}
                             enter="ease-out duration-300"
@@ -239,11 +251,11 @@ const BrandManager = () => {
                                 <Dialog.Panel className="pointer-events-auto w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 shadow-xl transition-all">
                                     <div className="flex items-start justify-between">
                                         <Dialog.Title className="text-lg font-medium text-gray-900">
-                                            Chỉnh sửa thương hiệu
+                                            Thông tin
                                         </Dialog.Title>
                                         <button
                                             className="text-gray-400 hover:text-gray-500"
-                                            onClick={() => setEditingBrand(null)}
+                                            onClick={() => setEditingSlide(null)}
                                         >
                                             ✕
                                         </button>
@@ -251,28 +263,22 @@ const BrandManager = () => {
 
                                     <div className="mt-6 space-y-4">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Tên thương hiệu</label>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                                             <input
                                                 className="border px-3 py-2 rounded w-full outline-none"
                                                 value={editForm.name}
                                                 onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                                                placeholder="Tên thương hiệu"
+                                                placeholder="Name"
                                             />
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
-                                            <textarea
-                                                rows={4}
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">LocalName</label>
+                                            <input
                                                 className="border px-3 py-2 rounded w-full outline-none"
-                                                value={editForm.description}
-                                                onChange={(e) =>
-                                                    setEditForm({
-                                                        ...editForm,
-                                                        description: e.target.value,
-                                                    })
-                                                }
-                                                placeholder="Nhập mô tả chi tiết tại đây"
+                                                value={editForm.localName}
+                                                onChange={(e) => setEditForm({ ...editForm, localName: e.target.value })}
+                                                placeholder="LocalName"
                                             />
                                         </div>
                                         <div>
@@ -297,7 +303,7 @@ const BrandManager = () => {
                                             Lưu
                                         </button>
                                         <button
-                                            onClick={() => setEditingBrand(null)}
+                                            onClick={() => setEditingSlide(null)}
                                             className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
                                         >
                                             Hủy
@@ -331,4 +337,4 @@ const BrandManager = () => {
 };
 
 
-export default BrandManager
+export default SlideManager

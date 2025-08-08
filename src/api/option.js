@@ -1,21 +1,22 @@
-const API_URL = `/api/v1/m/supplier`;
+const API_URL = `/api/v1/m/options`;
 
-export const fetchSupplierWithPaging = async ({ page = 0, size = 10, search = '' }) => {
+export const fetchOptionsWithPaging = async ({
+    page = 0,
+    size = 10,
+    search = '',
+    sortBy = 'id',
+    direction = 'asc',
+}) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
-        if (!token) {
-            throw new Error('Token không tồn tại. Vui lòng đăng nhập lại.');
-        }
+        if (!token) throw new Error('Token không tồn tại. Vui lòng đăng nhập lại.');
 
-        const url = new URL(`/page`, window.location.origin);
+        const url = new URL(`${API_URL}/page`, window.location.origin);
         url.searchParams.append('page', page);
         url.searchParams.append('size', size);
-        url.searchParams.append('sortBy', 'id');
-        url.searchParams.append('direction', 'asc');
-
-        if (search) {
-            url.searchParams.append('search', search);
-        }
+        url.searchParams.append('sortBy', sortBy);
+        url.searchParams.append('direction', direction);
+        if (search) url.searchParams.append('search', search);
 
         const response = await fetch(url, {
             method: 'GET',
@@ -33,11 +34,11 @@ export const fetchSupplierWithPaging = async ({ page = 0, size = 10, search = ''
         const json = await response.json();
         return json.data;
     } catch (error) {
-        console.error("Lỗi khi fetch supplier:", error);
+        console.error("Lỗi khi fetch option:", error);
         throw error;
     }
 };
-export const updateSupplierById = async (id, payload) => {
+export const updateOptionById = async (id, payload) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
         const response = await fetch(`/update/${id}`, {
@@ -56,11 +57,11 @@ export const updateSupplierById = async (id, payload) => {
         const json = await response.json();
         return json.data;
     } catch (err) {
-        console.error('Lỗi update supplier:', err);
+        console.error('Lỗi update option:', err);
         throw err;
     }
 };
-export const createSupplier = async (payload) => {
+export const createOption = async (payload) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
 
@@ -76,7 +77,7 @@ export const createSupplier = async (payload) => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(errorText || 'Tạo supplier thất bại');
+            throw new Error(errorText || 'Tạo option thất bại');
         }
 
         const json = await response.json();
@@ -86,33 +87,7 @@ export const createSupplier = async (payload) => {
         throw err;
     }
 };
-
-export const getAllSupplier = async () => {
-    try {
-        const token = localStorage.getItem('MANAGER_token');
-        const response = await fetch(`${API_URL}/all`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            const text = await response.text();
-            console.error("Lỗi response:", response.status, text);
-            throw new Error(`Lỗi response: ${response.status}`);
-        }
-
-        const result = await response.json();
-        return result.data;
-    } catch (error) {
-        console.error("Lỗi kết nối supplier API:", error);
-        throw error;
-    }
-};
-
-export const fetchSupplierById = async (id) => {
+export const fetchOptionById = async (id) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
         const response = await fetch(`${API_URL}/${id}`, {
@@ -124,7 +99,7 @@ export const fetchSupplierById = async (id) => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(errorText || 'Không tìm thấy supplier');
+            throw new Error(errorText || 'Không tìm thấy option');
         }
         const json = await response.json();
         return json.data;
@@ -133,7 +108,7 @@ export const fetchSupplierById = async (id) => {
         throw new Error(error.message || 'Đã xảy ra lỗi khi lấy thông tin');
     }
 };
-export const changeSupplierStatus = async (id, status) => {
+export const changeOptionStatus = async (id, status) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
         const response = await fetch(`/change-status/${id}?status=${status}`, {

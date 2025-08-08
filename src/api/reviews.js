@@ -2,7 +2,7 @@ const API_URL = `/api/v1/m/reviews`;
 
 export const fetchReviewsWithPaging = async ({ page = 0, size = 10, search = '' }) => {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('MANAGER_token');
         if (!token) {
             throw new Error('Token không tồn tại. Vui lòng đăng nhập lại.');
         }
@@ -40,7 +40,7 @@ export const fetchReviewsWithPaging = async ({ page = 0, size = 10, search = '' 
 
 export const fetchReviewsById = async (id) => {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('MANAGER_token');
         const response = await fetch(`${API_URL}/${id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,

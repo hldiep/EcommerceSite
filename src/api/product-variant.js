@@ -1,6 +1,6 @@
-const API_URL = `/api/v1/m/supplier`;
+const API_URL = `/api/v1/m/product-variants`;
 
-export const fetchSupplierWithPaging = async ({ page = 0, size = 10, search = '' }) => {
+export const fetchProductVariantsWithPaging = async ({ page = 0, size = 10, search = '' }) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
         if (!token) {
@@ -33,11 +33,11 @@ export const fetchSupplierWithPaging = async ({ page = 0, size = 10, search = ''
         const json = await response.json();
         return json.data;
     } catch (error) {
-        console.error("Lỗi khi fetch supplier:", error);
+        console.error("Lỗi khi fetch product variant:", error);
         throw error;
     }
 };
-export const updateSupplierById = async (id, payload) => {
+export const updateProductVariantById = async (id, payload) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
         const response = await fetch(`/update/${id}`, {
@@ -56,11 +56,11 @@ export const updateSupplierById = async (id, payload) => {
         const json = await response.json();
         return json.data;
     } catch (err) {
-        console.error('Lỗi update supplier:', err);
+        console.error('Lỗi update product variant:', err);
         throw err;
     }
 };
-export const createSupplier = async (payload) => {
+export const createProductVariant = async (payload) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
 
@@ -76,43 +76,17 @@ export const createSupplier = async (payload) => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(errorText || 'Tạo supplier thất bại');
+            throw new Error(errorText || 'Tạo product variant thất bại');
         }
 
         const json = await response.json();
         return json.data;
     } catch (err) {
-        console.error('Lỗi tạo supplier:', err);
+        console.error('Lỗi tạo product variant:', err);
         throw err;
     }
 };
-
-export const getAllSupplier = async () => {
-    try {
-        const token = localStorage.getItem('MANAGER_token');
-        const response = await fetch(`${API_URL}/all`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            const text = await response.text();
-            console.error("Lỗi response:", response.status, text);
-            throw new Error(`Lỗi response: ${response.status}`);
-        }
-
-        const result = await response.json();
-        return result.data;
-    } catch (error) {
-        console.error("Lỗi kết nối supplier API:", error);
-        throw error;
-    }
-};
-
-export const fetchSupplierById = async (id) => {
+export const fetchProductVariantById = async (id) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
         const response = await fetch(`${API_URL}/${id}`, {
@@ -124,7 +98,7 @@ export const fetchSupplierById = async (id) => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(errorText || 'Không tìm thấy supplier');
+            throw new Error(errorText || 'Không tìm thấy');
         }
         const json = await response.json();
         return json.data;
@@ -133,7 +107,8 @@ export const fetchSupplierById = async (id) => {
         throw new Error(error.message || 'Đã xảy ra lỗi khi lấy thông tin');
     }
 };
-export const changeSupplierStatus = async (id, status) => {
+
+export const changeProductVariantStatus = async (id, status) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
         const response = await fetch(`/change-status/${id}?status=${status}`, {
@@ -146,7 +121,7 @@ export const changeSupplierStatus = async (id, status) => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(errorText || 'Không thể thay đổi trạng thái');
+            throw new Error(errorText || 'Không thể thay đổi trạng thái biến thể');
         }
 
         return await response.json();

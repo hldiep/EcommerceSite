@@ -17,7 +17,7 @@ const LoginManager = () => {
         e.preventDefault();
         try {
             const data = await loginManagerApi(username, password);
-            login(data.user, data.token);
+            login(data.user, data.token, 'MANAGER');
             toast.success('Đăng nhập thành công!');
             navigate('/tongquan')
         } catch (error) {

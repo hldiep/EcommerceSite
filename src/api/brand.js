@@ -42,24 +42,57 @@ export const fetchBrandById = async (id) => {
         throw new Error(error.message || 'Đã xảy ra lỗi khi lấy thông tin');
     }
 };
-
-//manager
-export const fetchBrandsWithPaging = async ({ page = 0, size = 10, search = '' }) => {
+export const fetchBrandsByCategoryWithPaging = async ({
+    page = 0,
+    size = 20,
+    sortBy = 'id',
+    direction = 'asc',
+}) => {
     try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('Token không tồn tại. Vui lòng đăng nhập lại.');
+        const url = new URL(`${API_URL}/by-category/${id}`, window.location.origin);
+        url.searchParams.append('page', page);
+        url.searchParams.append('size', size);
+        url.searchParams.append('sortBy', sortBy);
+        url.searchParams.append('direction', direction);
+        if (search) url.searchParams.append('search', search);
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            const err = await response.text();
+            throw new Error(err || `Lỗi ${response.status}`);
         }
+
+        const json = await response.json();
+        return json.data;
+    } catch (error) {
+        console.error("Lỗi khi fetch brand:", error);
+        throw error;
+    }
+};
+//manager
+export const fetchBrandsWithPaging = async ({
+    page = 0,
+    size = 10,
+    search = '',
+    sortBy = 'id',
+    direction = 'asc',
+}) => {
+    try {
+        const token = localStorage.getItem('MANAGER_token');
+        if (!token) throw new Error('Token không tồn tại. Vui lòng đăng nhập lại.');
 
         const url = new URL(`/api/v1/m/brands/page`, window.location.origin);
         url.searchParams.append('page', page);
         url.searchParams.append('size', size);
-        url.searchParams.append('sortBy', 'id');
-        url.searchParams.append('direction', 'asc');
-
-        if (search) {
-            url.searchParams.append('search', search);
-        }
+        url.searchParams.append('sortBy', sortBy);
+        url.searchParams.append('direction', direction);
+        if (search) url.searchParams.append('search', search);
 
         const response = await fetch(url, {
             method: 'GET',
@@ -77,13 +110,13 @@ export const fetchBrandsWithPaging = async ({ page = 0, size = 10, search = '' }
         const json = await response.json();
         return json.data;
     } catch (error) {
-        console.error("Lỗi khi fetch brands:", error);
+        console.error("Lỗi khi fetch brand:", error);
         throw error;
     }
 };
 export const updateBrandById = async (id, payload) => {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('MANAGER_token');
         const response = await fetch(`/api/v1/m/brands/update/${id}`, {
             method: 'PUT',
             headers: {
@@ -106,7 +139,7 @@ export const updateBrandById = async (id, payload) => {
 };
 export const createBrand = async (payload) => {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('MANAGER_token');
 
         const response = await fetch('/api/v1/m/brands/add', {
             method: 'POST',
@@ -131,3 +164,25 @@ export const createBrand = async (payload) => {
     }
 };
 
+export const changeBrandStatus = async (id, status) => {
+    try {
+        const token = localStorage.getItem('MANAGER_token');
+        const response = await fetch(`/api/v1/m/brands/change-status/${id}?status=${status}`, {
+            method: 'PATCH',
+            headers: {
+                'Accept': '*/*',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Không thể thay đổi trạng thái thương hiệu');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Lỗi khi thay đổi trạng thái:', error);
+        throw error;
+    }
+};

@@ -1,7 +1,6 @@
 import { Route, Routes, useLocation } from 'react-router-dom'
 import Home from './components/home/Home'
 import ScrollToTopButton from './components/home/ScrollToTopButton'
-import Mobile from './components/category/Mobile'
 import ScrollToTop from './components/helper/ScrollToTop'
 import Brand from './components/category/Brand'
 import Register from './components/login/Register'
@@ -23,6 +22,12 @@ import CategoriesManager from './components/manager/CategoriesManager'
 import ProductManager from './components/manager/ProductManager'
 import BrandManager from './components/manager/BrandManager'
 import ProductManagerDetail from './components/manager/ProductManagerDetail'
+import DiscountManager from './components/manager/DiscountManager'
+import OptionManager from './components/manager/OptionManager'
+import SlideManager from './components/manager/SlideManager'
+import ProductCompare from './components/product/ProductCompare'
+import Category from './components/category/Category'
+import VerifyOtp from './components/login/VerifyOtp'
 function App() {
 
   return (
@@ -34,18 +39,20 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/register/verify-otp" element={<VerifyOtp />} />
         <Route path="/restore-password" element={<InputSdt />} />
         <Route path="/login-manager" element={<LoginManager />} />
 
         <Route path="/" element={<CustomerLayout />}>
           <Route index element={<Home />} />
-          <Route path="category/:id" element={<Mobile />} />
+          <Route path="category/:categoryId" element={<Category />} />
           <Route path="brand/:brandId" element={<Brand />} />
           <Route path="detail/:id" element={<Detail />} />
+          <Route path="/compare" element={<ProductCompare />} />
           <Route path="profile" element={<User />} />
           <Route path="search" element={<SearchResults />} />
           <Route path="cart" element={<Cart />} />
-          <Route path="payment" element={<InfoPayment />} />
+          <Route path="payment-info" element={<InfoPayment />} />
           <Route path="payment-continue" element={<PaymentPage />} />
         </Route>
 
@@ -53,7 +60,10 @@ function App() {
         <Route path="categories-manager" element={<CategoriesManager />} />
         <Route path="brands-manager" element={<BrandManager />} />
         <Route path="products-manager" element={<ProductManager />} />
+        <Route path="products-manager/option" element={<OptionManager />} />
+        <Route path="products-manager/slide" element={<SlideManager />} />
         <Route path="products-manager/:id" element={<ProductManagerDetail />} />
+        <Route path="discount-manager" element={<DiscountManager />} />
       </Routes>
       <ScrollToTopButton />
 

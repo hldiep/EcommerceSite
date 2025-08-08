@@ -1,42 +1,69 @@
 import React, { useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-
-const initialCart = [
-    {
-        id: 1,
-        name: 'iPhone 16 Pro 128GB | Chính hãng VN/A - Titan Sa Mạc',
-        price: 25190000,
-        originalPrice: 28990000,
-        quantity: 1,
-        image: 'https://cdn2.cellphones.com.vn/insecure/rs:fill:350:0/q:80/plain/https://cellphones.com.vn/media/catalog/product/i/p/iphone-16-pro-titan-sa-mac.png',
-        promotions: [
-            'Đặc quyền trợ giá lên đến 3 triệu khi thu cũ lên đời iPhone',
-            'Tặng combo 3 voucher tổng trị giá đến 2 triệu mua các sản phẩm tivi, gia dụng, đồng hồ trẻ em',
-            'Trả góp 0% lãi suất, tối đa 12 tháng, trả trước từ 10% qua CTTC hoặc 0đ qua thẻ tín dụng'
-        ]
-    }
-];
+import { toast } from 'react-toastify';
 
 const Cart = () => {
     const navigate = useNavigate();
-    const [cartItems, setCartItems] = useState(initialCart);
+    const [cartItems, setCartItems] = useState(() => {
+        const stored = localStorage.getItem('cart');
+        return stored ? JSON.parse(stored) : [];
+    });
 
-    const updateQuantity = (id, delta) => {
-        setCartItems(prev =>
-            prev.map(item =>
-                item.id === id
-                    ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-                    : item
-            )
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [showConfirm, setShowConfirm] = useState(false);
+
+    const handleSelect = (productId) => {
+        setSelectedIds((prev) =>
+            prev.includes(productId)
+                ? prev.filter((itemId) => itemId !== productId)
+                : [...prev, productId]
         );
     };
 
-    const removeItem = (id) => {
-        setCartItems(prev => prev.filter(item => item.id !== id));
+    const toggleSelectAll = () => {
+        if (selectedIds.length === cartItems.length) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(cartItems.map(item => item.productId));
+        }
     };
 
-    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const removeItem = (productId) => {
+        setCartItems(prev => {
+            const updated = prev.filter(item => item.productId !== productId);
+            localStorage.setItem('cart', JSON.stringify(updated));
+            return updated;
+        });
+        setSelectedIds(prev => prev.filter(id => id !== productId));
+    };
+
+    const confirmRemoveSelected = () => {
+        setCartItems(prev => {
+            const updated = prev.filter(item => !selectedIds.includes(item.productId));
+            localStorage.setItem('cart', JSON.stringify(updated));
+            return updated;
+        });
+        toast.success('Đã xoá sản phẩm đã chọn');
+        setSelectedIds([]);
+        setShowConfirm(false);
+    };
+
+    const updateQuantity = (productId, delta) => {
+        setCartItems(prev => {
+            const updated = prev.map(item =>
+                item.productId === productId
+                    ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+                    : item
+            );
+            localStorage.setItem('cart', JSON.stringify(updated));
+            return updated;
+        });
+    };
+
+    const total = cartItems
+        .filter((item) => selectedIds.includes(item.productId))
+        .reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
@@ -45,46 +72,79 @@ const Cart = () => {
 
                 <div className="bg-white p-4 rounded shadow-md max-w-5xl mx-auto">
                     {cartItems.length === 0 ? (
-                        <p className="text-center text-gray-600">Chưa có sản phẩm nào trong giỏ hàng.</p>
+                        <div className="text-center text-gray-600">
+                            <img
+                                src="https://cdn-icons-png.flaticon.com/512/2038/2038854.png"
+                                alt="Empty cart"
+                                className="mx-auto w-32 h-32 mb-4"
+                            />
+                            <p>Chưa có sản phẩm nào trong giỏ hàng.</p>
+                        </div>
                     ) : (
                         <>
-                            {cartItems.map(item => (
-                                <div key={item.id} className="flex items-start border-b py-4 gap-4">
-                                    <input type="checkbox" className="mt-2" />
-                                    <img src={item.image} alt={item.name} className="w-24 h-24 object-contain" />
-                                    <div className="flex-1">
+                            <div className="flex justify-between items-center mb-4">
+                                <button
+                                    onClick={toggleSelectAll}
+                                    className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                                >
+                                    {selectedIds.length === cartItems.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+                                </button>
+                                <button
+                                    onClick={() => setShowConfirm(true)}
+                                    className={`px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white text-sm ${selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    disabled={selectedIds.length === 0}
+                                >
+                                    Xoá đã chọn
+                                </button>
+                            </div>
+
+                            {cartItems.map((item) => (
+                                <div key={item.productId} className="flex items-start border-b py-4 gap-4">
+                                    <input
+                                        type="checkbox"
+                                        className="mt-2"
+                                        checked={selectedIds.includes(item.productId)}
+                                        onChange={() => handleSelect(item.productId)}
+                                    />
+                                    <img src={item.imageUrl} alt={item.name} className="w-24 h-24 object-contain" />
+                                    <div onClick={() => navigate(`/detail/${item.productId}`)} className="flex-1">
                                         <h3 className="font-semibold text-base">{item.name}</h3>
                                         <div className="flex items-center space-x-2 mt-1">
                                             <span className="text-red-600 font-bold text-lg">
-                                                {item.price.toLocaleString('vi-VN')}đ
+                                                {item.price?.toLocaleString('vi-VN')}đ
                                             </span>
-                                            <span className="text-gray-400 line-through">
-                                                {item.originalPrice.toLocaleString('vi-VN')}đ
-                                            </span>
+                                            {item.originalPrice && (
+                                                <span className="text-gray-400 line-through">
+                                                    {item.originalPrice.toLocaleString('vi-VN')}đ
+                                                </span>
+                                            )}
                                         </div>
-                                        <div className="bg-red-50 p-2 mt-2 rounded text-sm">
-                                            <div className="font-semibold text-red-600 mb-1">🎁 Khuyến mãi hấp dẫn</div>
-                                            <ul className="list-disc ml-5 space-y-1 text-gray-700">
-                                                {item.promotions.map((promo, index) => (
-                                                    <li key={index}>{promo}</li>
-                                                ))}
-                                            </ul>
-                                        </div>
+
+                                        {Array.isArray(item.promotions) && item.promotions.length > 0 && (
+                                            <div className="bg-red-50 p-2 mt-2 rounded text-sm">
+                                                <div className="font-semibold text-red-600 mb-1">🎁 Khuyến mãi hấp dẫn</div>
+                                                <ul className="list-disc ml-5 space-y-1 text-gray-700">
+                                                    {item.promotions.map((promo, idx) => (
+                                                        <li key={idx}>{promo}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex flex-col items-center gap-2">
                                         <div className="flex items-center border rounded">
                                             <button
                                                 className="px-2 text-xl"
-                                                onClick={() => updateQuantity(item.id, -1)}
+                                                onClick={() => updateQuantity(item.productId, -1)}
                                             >-</button>
                                             <span className="px-4">{item.quantity}</span>
                                             <button
                                                 className="px-2 text-xl"
-                                                onClick={() => updateQuantity(item.id, 1)}
+                                                onClick={() => updateQuantity(item.productId, 1)}
                                             >+</button>
                                         </div>
-                                        <button onClick={() => removeItem(item.id)} className="text-gray-500 hover:text-red-600">
+                                        <button onClick={() => removeItem(item.productId)} className="text-gray-500 hover:text-red-600">
                                             <FaTrash />
                                         </button>
                                     </div>
@@ -93,12 +153,28 @@ const Cart = () => {
 
                             <div className="flex justify-between items-center mt-6">
                                 <div className="text-lg font-medium">
-                                    Tạm tính: <span className="text-red-600 font-bold">{total.toLocaleString('vi-VN')}đ</span>
+                                    Tạm tính:&nbsp;
+                                    <span className="text-red-600 font-bold">
+                                        {total.toLocaleString('vi-VN')}đ
+                                    </span>
                                 </div>
                                 <button
-                                    onClick={() => navigate('/payment')}
-                                    disabled={cartItems.length === 0}
-                                    className={`px-6 py-2 rounded font-semibold text-white ${cartItems.length === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
+                                    onClick={() => {
+                                        const selectedItems = cartItems.filter(item => selectedIds.includes(item.productId));
+                                        const cartProducts = selectedItems.map(item => ({
+                                            productVariantId: item.productVariantId,
+                                            imageUrl: item.imageUrl,
+                                            name: item.name,
+                                            variantName: item.variantName,
+                                            price: item.price,
+                                            oldPrice: item.oldPrice,
+                                            quantity: item.quantity
+                                        }));
+
+                                        navigate("/payment-info", { state: { cartProducts } });
+                                    }}
+                                    disabled={selectedIds.length === 0}
+                                    className={`px-6 py-2 rounded font-semibold text-white ${selectedIds.length === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
                                 >
                                     Mua ngay
                                 </button>
@@ -106,6 +182,29 @@ const Cart = () => {
                         </>
                     )}
                 </div>
+
+                {showConfirm && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                        <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
+                            <h3 className="text-lg font-semibold mb-4">Xác nhận xoá</h3>
+                            <p className="mb-6">Bạn có chắc chắn muốn xoá các sản phẩm đã chọn không?</p>
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    onClick={() => setShowConfirm(false)}
+                                    className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+                                >
+                                    Huỷ
+                                </button>
+                                <button
+                                    onClick={confirmRemoveSelected}
+                                    className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                                >
+                                    Xoá
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

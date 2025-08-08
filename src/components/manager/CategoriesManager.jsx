@@ -13,6 +13,8 @@ const CategoriesManager = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  const [sortBy, setSortBy] = useState('id');
+  const [direction, setDirection] = useState('asc');
   const [editingCategory, setEditingCategory] = useState(null);
   const [editForm, setEditForm] = useState({
     name: '',
@@ -23,12 +25,17 @@ const CategoriesManager = () => {
 
   useEffect(() => {
     loadCategories();
-  }, [page]);
-
+  }, [page, sortBy, direction]);
   const loadCategories = async () => {
     setLoading(true);
     try {
-      const data = await fetchCategoriesWithPaging({ page, size: 10, search: keyword });
+      const data = await fetchCategoriesWithPaging({
+        page,
+        size: 10,
+        search: keyword,
+        sortBy,
+        direction,
+      });
       setCategories(data.data);
       setTotalPages(data.totalPages);
     } catch (error) {
@@ -37,7 +44,6 @@ const CategoriesManager = () => {
       setLoading(false);
     }
   };
-
   const handleSearch = () => {
     setPage(0);
     loadCategories();
@@ -83,7 +89,15 @@ const CategoriesManager = () => {
       }
     }
   };
+  const handleSortByChange = (e) => {
+    setSortBy(e.target.value);
+    setPage(0); // về trang đầu
+  };
 
+  const handleDirectionChange = (e) => {
+    setDirection(e.target.value);
+    setPage(0); // về trang đầu
+  };
   return (
     <ClippedDrawer>
       <div className="p-6 max-w-7xl mx-auto space-y-6 bg-gray-50 min-h-[calc(100vh-80px)]">
@@ -116,7 +130,25 @@ const CategoriesManager = () => {
               Tìm kiếm
             </button>
           </div>
+          <div className="flex gap-4 items-center justify-end">
+            <select
+              value={sortBy}
+              onChange={handleSortByChange}
+              className="border px-4 py-2 rounded w-48 outline-none"
+            >
+              <option value="id">Sắp xếp theo ID</option>
+              <option value="name">Sắp xếp theo tên</option>
+            </select>
 
+            <select
+              value={direction}
+              onChange={handleDirectionChange}
+              className="border px-4 py-2 rounded w-36 outline-none"
+            >
+              <option value="asc">Tăng dần</option>
+              <option value="desc">Giảm dần</option>
+            </select>
+          </div>
           <button
             onClick={() => {
               setEditForm({
@@ -148,17 +180,32 @@ const CategoriesManager = () => {
               </tr>
             </thead>
             <tbody>
-              {categories.map((item) => (
-                <tr
-                  key={item.id}
-                  className="border-t hover:bg-blue-50 cursor-pointer"
-                  onClick={() => handleEditClick(item)}
-                >
-                  <td className="p-3">{item.id}</td>
-                  <td className="p-3">{item.name}</td>
-                  <td className="p-3 text-gray-500">{item.seoName}</td>
+              {categories.length === 0 ? (
+                <tr>
+                  <td colSpan="3" className="text-center py-6">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <img
+                        src="https://www.shutterstock.com/image-vector/no-result-document-file-data-600nw-2293706569.jpg"
+                        alt="Không có dữ liệu"
+                        className="w-32 h-32 object-contain opacity-60"
+                      />
+                      <p className="text-gray-500">Không có dữ liệu</p>
+                    </div>
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                categories.map((item) => (
+                  <tr
+                    key={item.id}
+                    className="border-t hover:bg-blue-50 cursor-pointer"
+                    onClick={() => handleEditClick(item)}
+                  >
+                    <td className="p-3">{item.id}</td>
+                    <td className="p-3">{item.name}</td>
+                    <td className="p-3 text-gray-500">{item.seoName}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         )}

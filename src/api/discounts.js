@@ -1,6 +1,6 @@
-const API_URL = `/api/v1/m/slides`;
+const API_URL = `/api/v1/m/discounts`;
 
-export const fetchSlidesWithPaging = async ({
+export const fetchDiscountsWithPaging = async ({
     page = 0,
     size = 10,
     search = '',
@@ -34,14 +34,14 @@ export const fetchSlidesWithPaging = async ({
         const json = await response.json();
         return json.data;
     } catch (error) {
-        console.error("Lỗi khi fetch slide:", error);
+        console.error("Lỗi khi fetch khuyến mãi:", error);
         throw error;
     }
 };
-export const updateSlidesById = async (id, payload) => {
+export const updateDiscountById = async (id, payload) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
-        const response = await fetch(`/update/${id}`, {
+        const response = await fetch(`${API_URL}/update/${id}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -57,15 +57,15 @@ export const updateSlidesById = async (id, payload) => {
         const json = await response.json();
         return json.data;
     } catch (err) {
-        console.error('Lỗi update slides:', err);
+        console.error('Lỗi update khuyến mãi:', err);
         throw err;
     }
 };
-export const createSlides = async (payload) => {
+export const createDiscount = async (payload) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
 
-        const response = await fetch('/add', {
+        const response = await fetch(`${API_URL}/add`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -77,67 +77,21 @@ export const createSlides = async (payload) => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(errorText || 'Tạo slides thất bại');
+            throw new Error(errorText || 'Tạo mã giảm giá thất bại');
         }
 
         const json = await response.json();
         return json.data;
     } catch (err) {
-        console.error('Lỗi tạo slides:', err);
+        console.error('Lỗi tạo mã giảm giá:', err);
         throw err;
     }
 };
 
-export const getAllSides = async () => {
+export const changeDiscountStatus = async (id, status) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
-        const response = await fetch(`${API_URL}/all`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            const text = await response.text();
-            console.error("Lỗi response:", response.status, text);
-            throw new Error(`Lỗi response: ${response.status}`);
-        }
-
-        const result = await response.json();
-        return result.data;
-    } catch (error) {
-        console.error("Lỗi kết nối slides API:", error);
-        throw error;
-    }
-};
-
-export const fetchSlidesById = async (id) => {
-    try {
-        const token = localStorage.getItem('MANAGER_token');
-        const response = await fetch(`${API_URL}/${id}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText || 'Không tìm thấy slides');
-        }
-        const json = await response.json();
-        return json.data;
-    } catch (error) {
-        console.error('Lỗi khi gọi API', error);
-        throw new Error(error.message || 'Đã xảy ra lỗi khi lấy thông tin');
-    }
-};
-export const changeSlideStatus = async (id, status) => {
-    try {
-        const token = localStorage.getItem('MANAGER_token');
-        const response = await fetch(`/change-status/${id}?status=${status}`, {
+        const response = await fetch(`${API_URL}/change-status/${id}?status=${status}`, {
             method: 'PATCH',
             headers: {
                 'Accept': '*/*',
@@ -147,7 +101,7 @@ export const changeSlideStatus = async (id, status) => {
 
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(errorText || 'Không thể thay đổi trạng thái slide');
+            throw new Error(errorText || 'Không thể thay đổi trạng thái khuyễn mãi');
         }
 
         return await response.json();

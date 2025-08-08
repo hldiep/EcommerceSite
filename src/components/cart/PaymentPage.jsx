@@ -1,18 +1,81 @@
-import React from 'react'
-import { FaChevronLeft } from 'react-icons/fa'
+import React, { useEffect, useState } from 'react';
+import { FaChevronLeft } from 'react-icons/fa';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { addOrder, getShipFee } from '../../api/order';
 
 const PaymentPage = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const { products, orderData } = location.state || {};
+
+    const [shipFee, setShipFee] = useState(0);
+    const [discount, setDiscount] = useState(0);
+    const [coupon, setCoupon] = useState('');
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('COD');
+
+    const applyCoupon = () => {
+        if (coupon === 'GIAM10') {
+            setDiscount(0.1); // 10%
+        } else {
+            setDiscount(0);
+        }
+    };
+    useEffect(() => {
+        const address = orderData?.deliveryAddress;
+        if (address) {
+            getShipFee(address).then((fee) => {
+                if (typeof fee === 'number') {
+                    setShipFee(fee);
+                } else {
+                    setShipFee(0);
+                }
+            });
+        }
+    }, [orderData]);
+    const totalQuantity = products.reduce((sum, item) => sum + item.quantity, 0);
+    const totalPrice = products.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const discountAmount = totalPrice * discount;
+    const finalAmount = totalPrice - discountAmount + shipFee;
+
+    const handlePayment = async () => {
+        const items = products.map((item) => ({
+            productVariantId: item.productVariantId,
+            quantity: item.quantity,
+            discountCode: coupon || ""
+        }));
+
+        const finalOrderData = {
+            items,
+            discountCode: coupon || "",
+            orderTime: new Date().toISOString(),
+            note: orderData.note || "",
+            deliveryAddress: orderData.deliveryAddress,
+            recipientName: orderData.fullName,
+            recipientPhone: orderData.phone,
+            payment: {
+                method: selectedPaymentMethod,
+            },
+        };
+
+        try {
+            const data = await addOrder(finalOrderData);
+            navigate('/payment-success', { state: { order: data } });
+        } catch (error) {
+            alert("Đặt hàng thất bại. Vui lòng thử lại.");
+            console.error("Lỗi đặt hàng:", error);
+        }
+    };
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
             <div className="container mt-20 mb-10 px-4">
-                {/* Back & Heading */}
                 <div className="flex items-center space-x-2 text-gray-700 mb-4">
-                    <FaChevronLeft />
-                    <h2 className="text-xl font-bold">Thông tin</h2>
+                    <button onClick={() => navigate(-1)} className="hover:text-red-600 transition">
+                        <FaChevronLeft />
+                    </button>
+                    <h2 className="text-xl font-bold">Thanh toán</h2>
                 </div>
 
                 <div className="p-4 rounded max-w-5xl mx-auto">
-
                     <div className="flex border-b border-gray-300 mb-4">
                         <div className="px-4 py-2 text-gray-500">1. THÔNG TIN</div>
                         <div className="px-4 py-2 text-red-600 font-semibold border-b-2 border-red-600">
@@ -30,8 +93,14 @@ const PaymentPage = () => {
                                     type="text"
                                     className="flex-1 border px-3 py-2 rounded-l-md outline-none"
                                     placeholder="Nhập mã..."
+                                    value={coupon}
+                                    onChange={(e) => setCoupon(e.target.value)}
                                 />
-                                <button className="bg-gray-200 px-4 py-2 rounded-r-md text-sm">
+                                <button
+                                    className="bg-gray-200 px-4 py-2 rounded-r-md text-sm"
+                                    onClick={applyCoupon}
+                                    type="button"
+                                >
                                     Áp dụng
                                 </button>
                             </div>
@@ -40,29 +109,28 @@ const PaymentPage = () => {
                         <div className="text-sm text-gray-700 space-y-2">
                             <div className="flex justify-between">
                                 <span>Số lượng sản phẩm</span>
-                                <span>01</span>
+                                <span>{totalQuantity} sản phẩm</span>
                             </div>
                             <div className="flex justify-between">
                                 <span>Tổng tiền hàng</span>
-                                <span>28.990.000đ</span>
+                                <span>{totalPrice}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span>Phí vận chuyển</span>
-                                <span>Miễn phí</span>
+                                <span>{shipFee === 0 ? 'Miễn phí' : shipFee}</span>
                             </div>
-                            <div className="flex justify-between text-red-600">
-                                <span>Giảm giá trực tiếp</span>
-                                <span>-3.900.000đ</span>
-                            </div>
+                            {discount > 0 && (
+                                <div className="flex justify-between text-red-600">
+                                    <span>Giảm giá ({(discount * 100).toFixed(0)}%)</span>
+                                    <span>-{discountAmount}</span>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex justify-between mt-4 font-semibold text-lg">
-                            <span className="text-black">Tổng tiền</span>
-                            <span className="text-black">25.090.000đ</span>
+                            <span className="text-black">Tổng tiền thanh toán</span>
+                            <span className="text-black">{finalAmount}</span>
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">
-                            Đã gồm VAT và được làm tròn
-                        </p>
                     </div>
 
                     <div className="bg-white p-4 rounded-lg border mb-4">
@@ -78,48 +146,57 @@ const PaymentPage = () => {
                         </div>
                         <div className="mt-4">
                             <label className="flex items-center space-x-2">
-                                <input type="radio" name="payment" defaultChecked />
+                                <input
+                                    type="radio"
+                                    name="payment"
+                                    value="COD"
+                                    checked={selectedPaymentMethod === 'COD'}
+                                    onChange={() => setSelectedPaymentMethod('COD')}
+                                />
                                 <span>Thanh toán khi nhận hàng (COD)</span>
                             </label>
                             <label className="flex items-center space-x-2 mt-2">
-                                <input type="radio" name="payment" />
+                                <input
+                                    type="radio"
+                                    name="payment"
+                                    value="BANK"
+                                    checked={selectedPaymentMethod === 'BANK'}
+                                    onChange={() => setSelectedPaymentMethod('BANK')}
+                                />
                                 <span>Chuyển khoản ngân hàng</span>
                             </label>
                         </div>
                     </div>
+
                     <div className="bg-white p-4 rounded-lg border mb-4">
-                        <h3 className="text-gray-800 font-semibold text-lg mb-3 border-b pb-1">THÔNG TIN NHẬN HÀNG</h3>
+                        <h3 className="text-gray-800 font-semibold text-lg mb-3 border-b pb-1">
+                            THÔNG TIN NHẬN HÀNG
+                        </h3>
                         <div className="text-sm text-gray-800 space-y-2">
                             <div className="flex">
                                 <span className="w-40 text-gray-500">Khách hàng</span>
-                                <span>
-                                    Hoàng Linh Điệp
-                                </span>
+                                <span>{orderData?.recipientName}</span>
                             </div>
                             <div className="flex">
                                 <span className="w-40 text-gray-500">Số điện thoại</span>
-                                <span>0385457894</span>
-                            </div>
-                            <div className="flex">
-                                <span className="w-40 text-gray-500">Email</span>
-                                <span>hoanglinhdiep8@gmail.com</span>
+                                <span>{orderData?.recipientPhone}</span>
                             </div>
                             <div className="flex">
                                 <span className="w-40 text-gray-500">Nhận hàng tại</span>
-                                <span>102, Thị trấn Cần Thạnh, Huyện Cần Giờ, Hồ Chí Minh</span>
+                                <span>
+                                    {orderData.deliveryAddress}
+                                </span>
                             </div>
                             <div className="flex">
                                 <span className="w-40 text-gray-500">Người nhận</span>
-                                <span>Hoàng Linh Điệp - 0385457894</span>
+                                <span>{orderData.recipientName} - {orderData.recipientPhone}</span>
                             </div>
                         </div>
                     </div>
+
                     <div className="mt-4 mb-4">
                         <label className="inline-flex items-center text-sm text-gray-700">
-                            <input
-                                type="checkbox"
-                                className="form-checkbox h-4 w-4 text-red-600"
-                            />
+                            <input type="checkbox" className="form-checkbox h-4 w-4 text-red-600" />
                             <span className="ml-2">Bằng việc Đặt hàng, bạn đồng ý với Điều khoản sử dụng của chúng tôi.</span>
                         </label>
                     </div>
@@ -127,16 +204,19 @@ const PaymentPage = () => {
                     <div className="bg-white rounded-lg shadow p-4 sticky bottom-0">
                         <div className="flex justify-between font-semibold text-lg">
                             <span>Tổng tiền tạm tính:</span>
-                            <span className="text-red-600">25.090.000đ</span>
+                            <span className="text-red-600">{finalAmount} VNĐ</span>
                         </div>
-                        <button className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white py-3 rounded text-base font-semibold">
+                        <button
+                            className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white py-3 rounded text-base font-semibold"
+                            onClick={handlePayment}
+                        >
                             Thanh toán
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default PaymentPage
+export default PaymentPage;

@@ -1,53 +1,63 @@
 import React, { useEffect, useState } from 'react';
 import { FaHeart, FaHome, FaStar } from 'react-icons/fa';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MdLocalOffer } from 'react-icons/md';
+import {
+    MdLocalOffer
+} from 'react-icons/md';
 import { BiSortUp, BiSortDown } from "react-icons/bi";
-import { fetchProductsPublicWithPaging } from '../../api/product';
-import { fetchBrandById } from '../../api/brand';
+import { fetchCategoryById } from '../../api/categories';
+import { fetchProductByCategory } from '../../api/product';
+import { fetchBrandsByCategoryWithPaging } from '../../api/brand';
 
-const Brand = () => {
+const Category = () => {
     const navigate = useNavigate();
-    const [selected, setSelected] = useState("popular");
-    const [brand, setBrand] = useState(null);
+    const { categoryId } = useParams();
+    const [category, setCategory] = useState(null);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
-    const { brandId } = useParams();
+    const [selected, setSelected] = useState("popular");
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
-    const options = [
-        { key: "popular", label: "Phổ biến", icon: <FaStar className="text-blue-600" /> },
-        { key: "promo", label: "Khuyến mãi HOT", icon: <MdLocalOffer className="text-black" /> },
-        { key: "price-asc", label: "Giá Thấp - Cao", icon: <BiSortUp className="text-black" /> },
-        { key: "price-desc", label: "Giá Cao - Thấp", icon: <BiSortDown className="text-black" /> },
-    ];
-    const loadData = async (currentPage = 0, append = false) => {
+    const [brands, setBrands] = useState([]);
+    const [loadingBrands, setLoadingBrands] = useState(true);
+    const fetchBrands = async () => {
+        try {
+            const brandData = await fetchBrandsByCategoryWithPaging({
+                categoryId,
+                page: 0,
+                size: 20,
+                sortBy: 'id',
+                direction: 'asc',
+                token,
+            });
+            setBrands(brandData || []);
+        } catch (err) {
+            console.error(err);
+            setBrands([]);
+        } finally {
+            setLoadingBrands(false);
+        }
+    };
+    const fetchData = async (currentPage = 0, append = false) => {
         if (append) setLoadingMore(true);
         else setLoading(true);
 
         try {
             if (!append) {
-                const brandData = await fetchBrandById(brandId);
-                setBrand(brandData);
+                const categoryData = await fetchCategoryById(categoryId);
+                setCategory(categoryData);
             }
 
-            const productData = await fetchProductsPublicWithPaging({
-                brandId,
-                page: currentPage,
-                size: 20, // dùng currentPage thay vì fix 0
-            });
-
+            const productData = await fetchProductByCategory(categoryId, currentPage, 20, 'id', 'desc');
             const newProducts = productData?.data || [];
-
             if (append) {
                 setProducts((prev) => [...prev, ...newProducts]);
             } else {
                 setProducts(newProducts);
             }
 
-            // Vì size = 20 → so sánh đúng
-            if (newProducts.length < 20) {
+            if (newProducts.length < 10) {
                 setHasMore(false);
             } else {
                 setHasMore(true);
@@ -55,21 +65,26 @@ const Brand = () => {
 
             setPage(currentPage);
         } catch (err) {
-            console.error(err);
+            console.error("Lỗi load danh mục", err);
         } finally {
             if (append) setLoadingMore(false);
             else setLoading(false);
         }
     };
     useEffect(() => {
-        if (brandId) {
+        if (categoryId) {
             setPage(0);
             setHasMore(true);
-            loadData(0, false);
+            fetchData(0, false);
         }
-    }, [brandId]);
-
-    if (!brand) return <p>Không tìm thấy thông tin thương hiệu.</p>;
+    }, [categoryId]);
+    if (!categoryId) return <p>Không tìm thấy danh mục.</p>;
+    const options = [
+        { key: "popular", label: "Phổ biến", icon: <FaStar className="text-blue-600" /> },
+        { key: "promo", label: "Khuyến mãi HOT", icon: <MdLocalOffer className="text-black" /> },
+        { key: "price-asc", label: "Giá Thấp - Cao", icon: <BiSortUp className="text-black" /> },
+        { key: "price-desc", label: "Giá Cao - Thấp", icon: <BiSortDown className="text-black" /> },
+    ];
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
             <div className='container mt-20 mb-10'>
@@ -78,12 +93,35 @@ const Brand = () => {
                     <button onClick={() => navigate('/')}
                         className="text-gray-700">Trang chủ</button>
                     <span className="text-gray-700">/</span>
-                    {/* <button onClick={() => navigate('/mobile')}
-                        className="text-gray-700">Điện thoại</button>
-                    <span className="text-gray-700">/</span> */}
-                    <span className="text-black font-medium">{brand.name}</span>
+                    <span className="text-black font-medium">{category?.name || "Danh mục"}</span>
                 </div>
-
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <img
+                        src="https://cdn2.cellphones.com.vn/insecure/rs:fill:595:100/q:80/plain/https://dashboard.cellphones.com.vn/storage/dienj-thoai-vivo-b2s.png"
+                        alt="banner 1"
+                        className="rounded-xl w-full h-auto object-cover"
+                    />
+                    <img
+                        src="https://cdn2.cellphones.com.vn/insecure/rs:fill:595:100/q:80/plain/https://dashboard.cellphones.com.vn/storage/nothing-phone-3a-cate-0625.png"
+                        alt="banner 2"
+                        className="rounded-xl w-full h-auto object-cover"
+                    />
+                </div>
+                {brands.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-6">
+                        <h2 className="text-xl font-bold mb-3">Các thương hiệu</h2>
+                        {brands.map((brand, index) => (
+                            <button
+                                onClick={() => navigate(`/brand/${brand.id}`)}
+                                key={index}
+                                className="flex items-center gap-2 px-4 py-2 bg-white border rounded-md shadow text-sm font-medium hover:shadow-md cursor-pointer transition"
+                            >
+                                <img src={brand.logo} alt={brand.name} className="w-5 h-5 object-contain" />
+                                {brand.name}
+                            </button>
+                        ))}
+                    </div>
+                )}
                 <div className="mb-6 flex mt-6 justify-between">
                     <h2 className="text-base font-semibold mb-2 mt-2">Sắp xếp theo</h2>
                     <div className="flex flex-wrap gap-2">
@@ -92,10 +130,10 @@ const Brand = () => {
                                 key={option.key}
                                 onClick={() => setSelected(option.key)}
                                 className={`flex items-center gap-1 px-4 py-2 rounded-full border text-sm font-medium transition
-                  ${selected === option.key
+              ${selected === option.key
                                         ? "border-blue-500 text-blue-600 bg-blue-50"
                                         : "border-gray-200 text-black bg-gray-100 hover:bg-gray-200"}
-                `}
+            `}
                             >
                                 {option.icon}
                                 {option.label}
@@ -103,6 +141,7 @@ const Brand = () => {
                         ))}
                     </div>
                 </div>
+
                 {loading ? (
                     <div className="flex justify-center items-center py-10">
                         <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-r-transparent"></div>
@@ -110,7 +149,7 @@ const Brand = () => {
                     </div>
                 ) : products.length === 0 ? (
                     <div className="text-center w-full py-10 text-gray-600">
-                        <p className="text-lg font-semibold">Không có sản phẩm nào từ thương hiệu này.</p>
+                        <p className="text-lg font-semibold">Không có sản phẩm nào từ danh mục này.</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
@@ -166,7 +205,7 @@ const Brand = () => {
                 {hasMore && !loading && (
                     <div className="text-center mt-6">
                         <button
-                            onClick={() => loadData(page + 1, true)}
+                            onClick={() => fetchData(page + 1, true)}
                             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                             disabled={loadingMore}
                         >
@@ -176,7 +215,7 @@ const Brand = () => {
                 )}
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default Brand
+export default Category;

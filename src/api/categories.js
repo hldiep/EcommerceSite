@@ -65,22 +65,23 @@ export const fetchCategoryById = async (id) => {
 };
 
 //manager
-export const fetchCategoriesWithPaging = async ({ page = 0, size = 10, search = '' }) => {
+export const fetchCategoriesWithPaging = async ({
+    page = 0,
+    size = 10,
+    search = '',
+    sortBy = 'id',
+    direction = 'asc',
+}) => {
     try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            throw new Error('Token không tồn tại. Vui lòng đăng nhập lại.');
-        }
+        const token = localStorage.getItem('MANAGER_token');
+        if (!token) throw new Error('Token không tồn tại. Vui lòng đăng nhập lại.');
 
         const url = new URL(`/api/v1/m/categories/page`, window.location.origin);
         url.searchParams.append('page', page);
         url.searchParams.append('size', size);
-        url.searchParams.append('sortBy', 'id');
-        url.searchParams.append('direction', 'asc');
-
-        if (search) {
-            url.searchParams.append('search', search);
-        }
+        url.searchParams.append('sortBy', sortBy);
+        url.searchParams.append('direction', direction);
+        if (search) url.searchParams.append('search', search);
 
         const response = await fetch(url, {
             method: 'GET',
@@ -102,9 +103,10 @@ export const fetchCategoriesWithPaging = async ({ page = 0, size = 10, search = 
         throw error;
     }
 };
+
 export const updateCategoryById = async (id, payload) => {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('MANAGER_token');
         const response = await fetch(`/api/v1/m/categories/update/${id}`, {
             method: 'PUT',
             headers: {
@@ -127,7 +129,7 @@ export const updateCategoryById = async (id, payload) => {
 };
 export const createCategory = async (payload) => {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('MANAGER_token');
 
         const response = await fetch('/api/v1/m/categories/add', {
             method: 'POST',
@@ -152,3 +154,25 @@ export const createCategory = async (payload) => {
     }
 };
 
+export const changeCategoryStatus = async (id, status) => {
+    try {
+        const token = localStorage.getItem('MANAGER_token');
+        const response = await fetch(`/api/v1/m/categories/change-status/${id}?status=${status}`, {
+            method: 'PATCH',
+            headers: {
+                'Accept': '*/*',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Không thể thay đổi trạng thái danh mục');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Lỗi khi thay đổi trạng thái:', error);
+        throw error;
+    }
+};

@@ -24,7 +24,7 @@ const InputSdt = () => {
                         className="mx-auto h-36 mb-4 mt-10"
                     />
                     <h2 className='text-red-600 text-3xl font-bold mb-4'>Tạo mật khẩu mới</h2>
-                    <span>Hãy nhập số điện thoại của bạn vào bên dưới để bắt đầu quá trình khôi phục mật khẩu.</span>
+                    <span>Hãy nhập email của bạn vào bên dưới để bắt đầu quá trình khôi phục mật khẩu.</span>
                 </div>
                 <div className="flex items-center justify-center px-4 mt-10">
                     <form onSubmit={handleSubmit} className="bg-white p-6 max-w-2xl w-full">

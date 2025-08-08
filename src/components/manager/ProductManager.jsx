@@ -35,6 +35,13 @@ const ProductManager = () => {
 
         loadCategories();
     }, []);
+
+    const flattenCategories = (categories, level = 0) => {
+        return categories.flatMap(cat => [
+            { ...cat, level },
+            ...(cat.children ? flattenCategories(cat.children, level + 1) : [])
+        ]);
+    };
     useEffect(() => {
         const loadBrands = async () => {
             try {
@@ -98,7 +105,16 @@ const ProductManager = () => {
                         <span>/</span>
                         <span className="text-gray-700 font-medium">Quản lý sản phẩm</span>
                     </div>
-                    <h2 className="text-xl font-semibold p-4">Quản lý sản phẩm</h2>
+                    <div className='flex justify-between items-center'>
+                        <h2 className="text-xl font-semibold p-4">Quản lý sản phẩm</h2>
+                        <div className='flex space-x-2 mr-2'>
+                            <button onClick={() => navigate('/products-manager/slide')}
+                                className='px-2 py-1 bg-green-600 rounded-lg text-white'>Slide</button>
+                            <button onClick={() => navigate('/products-manager/option')}
+                                className='px-2 py-1 bg-blue-600 rounded-lg text-white'>Option</button>
+                        </div>
+                    </div>
+
                 </div>
 
                 {/* Filters */}
@@ -125,7 +141,7 @@ const ProductManager = () => {
                             ))}
                         </select>
 
-                        <select
+                        {/* <select
                             value={categoryId}
                             onChange={(e) => setCategoryId(e.target.value)}
                             className="border px-4 py-2 rounded w-52 outline-none"
@@ -136,8 +152,19 @@ const ProductManager = () => {
                                     {c.name}
                                 </option>
                             ))}
+                        </select> */}
+                        <select
+                            value={categoryId}
+                            onChange={(e) => setCategoryId(e.target.value)}
+                            className="border px-4 py-2 rounded w-60 outline-none"
+                        >
+                            <option value="">-- Danh mục --</option>
+                            {flattenCategories(categories).map((c) => (
+                                <option key={c.id} value={c.id}>
+                                    {`${'-- '.repeat(c.level)}${c.name}`}
+                                </option>
+                            ))}
                         </select>
-
                         <select
                             value={status}
                             onChange={(e) => setStatus(e.target.value)}
@@ -167,7 +194,6 @@ const ProductManager = () => {
                             <option value="desc">Giảm dần</option>
                         </select>
 
-                        {/* Giá từ - đến */}
                         <input
                             type="number"
                             min="0"
@@ -209,131 +235,80 @@ const ProductManager = () => {
                     </button>
                 </div>
 
-                {/* Product Table */}
-                <div className="bg-white shadow rounded overflow-x-auto">
-                    {loading ? (
-                        <div className="flex justify-center items-center py-10">
-                            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-r-transparent"></div>
-                            <div className="ml-4 text-blue-600 font-medium text-lg">Đang tải dữ liệu...</div>
-                        </div>
-                    ) : products.length === 0 ? (
-                        <div className="text-center text-gray-600 py-10">Không có sản phẩm nào được tìm thấy.</div>
-                    ) : (
-                        <table className="w-full table-auto border text-sm">
-                            <thead className="bg-gray-100">
+                {loading ? (
+                    <div className="flex justify-center items-center py-10">
+                        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-r-transparent"></div>
+                        <div className="ml-4 text-blue-600 font-medium text-lg">Đang tải dữ liệu...</div>
+                    </div>
+                ) : (
+                    <table className="w-full table-auto border">
+                        <thead className="bg-gray-100">
+                            <tr>
+                                <th className="px-4 py-2 text-left">Tên sản phẩm</th>
+                                <th className="px-4 py-2 text-left">Thương hiệu</th>
+                                <th className="px-4 py-2 text-left">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {products.length === 0 ? (
                                 <tr>
-                                    <th className="px-4 py-2 text-left">Tên sản phẩm</th>
-                                    <th className="px-4 py-2 text-left">Thương hiệu</th>
-                                    <th className="px-4 py-2 text-left">Thao tác</th>
+                                    <td colSpan="3" className="text-center py-6">
+                                        <div className="flex flex-col items-center justify-center space-y-2">
+                                            <img
+                                                src="https://www.shutterstock.com/image-vector/no-result-document-file-data-600nw-2293706569.jpg"
+                                                alt="Không có dữ liệu"
+                                                className="w-32 h-32 object-contain opacity-60"
+                                            />
+                                            <p className="text-gray-500">Không có dữ liệu</p>
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {products.map((product) => (
-                                    <>
-                                        <tr
-                                            key={product.id}
-                                            className="border-t hover:bg-gray-50 cursor-pointer"
-                                            onClick={() => navigate(`/products-manager/${product.id}`)}
-                                        >
-                                            <td className="px-4 py-2">{product.name}</td>
-                                            <td className="px-4 py-2">{product.brand?.name || '-'}</td>
-                                            <td className="px-4 py-2">
-                                                <div className="flex gap-2 items-center">
-                                                    <button
-                                                        className="px-2 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleAddVariant(product.id);
-                                                        }}
-                                                    >
-                                                        + Biến thể
-                                                    </button>
-                                                    <button
-                                                        className="px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleEditProduct(product);
-                                                        }}
-                                                    >
-                                                        Sửa
-                                                    </button>
-                                                    <button
-                                                        className="px-2 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDeleteProduct(product.id);
-                                                        }}
-                                                    >
-                                                        Xoá
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-
-                                        {/* {expandedRows.includes(product.id) && (
-                                            <tr className="bg-gray-50 border-t" key={`${product.id}-variants`}>
-                                                <td colSpan={4} className="px-6 py-4">
-                                                    {product.productVariants?.length ? (
-                                                        <table className="w-full table-auto text-sm">
-                                                            <thead>
-                                                                <tr className="text-gray-600">
-                                                                    <th className="px-2 py-1 text-left">Tên biến thể</th>
-                                                                    <th className="px-2 py-1 text-left">Giá</th>
-                                                                    <th className="px-2 py-1 text-left">Sale</th>
-                                                                    <th className="px-2 py-1 text-left">Ảnh</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                {product.productVariants.map((variant) => (
-                                                                    <tr key={variant.id} className="border-t hover:bg-white">
-                                                                        <td className="px-2 py-1">{variant.name}</td>
-                                                                        <td className="px-2 py-1 text-red-600">
-                                                                            {variant.price?.toLocaleString()}₫
-                                                                        </td>
-                                                                        <td className="px-2 py-1 text-red-500">
-                                                                            {variant.priceSale?.toLocaleString()}₫
-                                                                        </td>
-                                                                        <td className="px-2 py-1">
-                                                                            {variant.imageUrl ? (
-                                                                                <img
-                                                                                    src={variant.imageUrl}
-                                                                                    alt=""
-                                                                                    className="w-12 h-12 object-cover rounded"
-                                                                                />
-                                                                            ) : (
-                                                                                "-"
-                                                                            )}
-                                                                        </td>
-                                                                        <td className="px-3 py-2 flex items-center justify-center space-x-2">
-                                                                            <button
-                                                                                className="px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded"
-                                                                                onClick={() => handleEditVariant(variant)}
-                                                                            >
-                                                                                Sửa
-                                                                            </button>
-                                                                            <button
-                                                                                className="px-2 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded"
-                                                                                onClick={() => handleDeleteVariant(variant.id)}
-                                                                            >
-                                                                                Xoá
-                                                                            </button>
-                                                                        </td>
-                                                                    </tr>
-                                                                ))}
-                                                            </tbody>
-                                                        </table>
-                                                    ) : (
-                                                        <p className="text-gray-500 italic">Không có biến thể.</p>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        )} */}
-                                    </>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </div>
+                            ) : (
+                                products.map((product) => (
+                                    <tr
+                                        key={product.id}
+                                        className="border-t hover:bg-gray-50 cursor-pointer"
+                                        onClick={() => navigate(`/products-manager/${product.id}`)}
+                                    >
+                                        <td className="px-4 py-2">{product.name}</td>
+                                        <td className="px-4 py-2">{product.brand?.name || '-'}</td>
+                                        <td className="px-4 py-2">
+                                            <div className="flex gap-2 items-center">
+                                                <button
+                                                    className="px-2 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleAddVariant(product.id);
+                                                    }}
+                                                >
+                                                    + Biến thể
+                                                </button>
+                                                <button
+                                                    className="px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleEditProduct(product);
+                                                    }}
+                                                >
+                                                    Sửa
+                                                </button>
+                                                <button
+                                                    className="px-2 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteProduct(product.id);
+                                                    }}
+                                                >
+                                                    Xoá
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                )}
 
                 {/* Pagination */}
                 <div className="flex justify-center space-x-2">

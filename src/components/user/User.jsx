@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { FaClipboardList, FaGem, FaHistory, FaHome, FaLink, FaMapMarkerAlt, FaMedal, FaSearch, FaShoppingCart, FaSignOutAlt, FaTags, FaUserCircle } from 'react-icons/fa';
+import { FaHistory, FaHome, FaShoppingCart, FaSignOutAlt, FaTags, FaUserCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -8,21 +8,47 @@ const User = () => {
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
+    const [orderHistory, setOrderHistory] = useState([]);
+    const [recentOrders, setRecentOrders] = useState([]);
     const handleLogout = () => {
         const confirmed = window.confirm("Bạn có chắc chắn muốn đăng xuất?");
         if (confirmed) {
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
+            localStorage.removeItem('CUSTOMER_user');
+            localStorage.removeItem('CUSTOMER_token');
             setUser(null);
             toast.info('Bạn đã đăng xuất tài khoản');
             navigate('/');
         }
     };
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
+        const storedUser = localStorage.getItem('CUSTOMER_user');
         if (storedUser) {
             setUser(JSON.parse(storedUser));
         }
+
+        const fakeOrders = [
+            {
+                id: 'DH001',
+                date: '2025-07-15',
+                total: 1250000,
+                status: 'Đã giao',
+            },
+            {
+                id: 'DH002',
+                date: '2025-06-28',
+                total: 820000,
+                status: 'Đang xử lý',
+            },
+            {
+                id: 'DH003',
+                date: '2025-06-20',
+                total: 460000,
+                status: 'Đã hủy',
+            },
+        ];
+
+        setOrderHistory(fakeOrders);
+        setRecentOrders(fakeOrders.slice(0, 3));
     }, []);
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
@@ -91,15 +117,83 @@ const User = () => {
                     <div className='w-2/3'>
                         {activeTab === 'overview' && (
                             <div>
-                                <h2 className="font-semibold text-lg mb-3">Đơn hàng gần đây</h2>
-                                <p className='text-sm text-gray-500'>Hiện bạn chưa có đơn hàng nào.</p>
+                                <h2 className="font-semibold text-lg mb-3">Tổng quan tài khoản</h2>
+
+                                <div className="mb-5">
+                                    <p className="text-gray-700 text-sm">Xin chào, <span className="font-medium">{user?.fullName}</span>!</p>
+                                    <p className="text-gray-500 text-sm">Dưới đây là 3 đơn hàng gần nhất của bạn.</p>
+                                </div>
+
+                                {recentOrders.length === 0 ? (
+                                    <p className="text-sm text-gray-500">Bạn chưa có đơn hàng nào.</p>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <table className="min-w-full border text-sm text-left">
+                                            <thead className="bg-gray-100 text-gray-700">
+                                                <tr>
+                                                    <th className="px-4 py-2 border">Mã đơn</th>
+                                                    <th className="px-4 py-2 border">Ngày đặt</th>
+                                                    <th className="px-4 py-2 border">Tổng tiền</th>
+                                                    <th className="px-4 py-2 border">Trạng thái</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {recentOrders.map(order => (
+                                                    <tr key={order.id} className="hover:bg-gray-50">
+                                                        <td className="px-4 py-2 border">{order.id}</td>
+                                                        <td className="px-4 py-2 border">{order.date}</td>
+                                                        <td className="px-4 py-2 border">{order.total.toLocaleString()} ₫</td>
+                                                        <td className="px-4 py-2 border">{order.status}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+
+                                        <button
+                                            onClick={() => setActiveTab('history')}
+                                            className="mt-3 text-sm text-blue-500 hover:underline"
+                                        >
+                                            Xem tất cả đơn hàng
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
 
                         {activeTab === 'history' && (
                             <div>
                                 <h2 className="font-semibold text-lg mb-3">Lịch sử mua hàng</h2>
-                                <p className='text-sm text-gray-500'>Chức năng đang được phát triển.</p>
+
+                                {orderHistory.length === 0 ? (
+                                    <p className='text-sm text-gray-500'>Bạn chưa có đơn hàng nào.</p>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <table className="min-w-full border text-sm text-left">
+                                            <thead className="bg-gray-100 text-gray-700">
+                                                <tr>
+                                                    <th className="px-4 py-2 border">Mã đơn</th>
+                                                    <th className="px-4 py-2 border">Ngày đặt</th>
+                                                    <th className="px-4 py-2 border">Tổng tiền</th>
+                                                    <th className="px-4 py-2 border">Trạng thái</th>
+                                                    <th className="px-4 py-2 border">Chi tiết</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {orderHistory.map(order => (
+                                                    <tr key={order.id} className="hover:bg-gray-50">
+                                                        <td className="px-4 py-2 border">{order.id}</td>
+                                                        <td className="px-4 py-2 border">{order.date}</td>
+                                                        <td className="px-4 py-2 border">{order.total.toLocaleString()} ₫</td>
+                                                        <td className="px-4 py-2 border">{order.status}</td>
+                                                        <td className="px-4 py-2 border text-blue-500 cursor-pointer hover:underline">
+                                                            Xem
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
                             </div>
                         )}
 

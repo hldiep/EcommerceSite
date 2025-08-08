@@ -35,7 +35,7 @@ export default function ClippedDrawer({ children }) {
     { text: 'Thương hiệu', icon: <BrandingWatermarkIcon />, path: '/brands-manager' },
     { text: 'Đơn hàng', icon: <ShoppingCartIcon />, path: '/orders' },
     { text: 'Khách hàng', icon: <PeopleIcon />, path: '/customers' },
-    { text: 'Mã giảm giá', icon: <DiscountIcon />, path: '/coupons' },
+    { text: 'Mã giảm giá', icon: <DiscountIcon />, path: '/discount-manager' },
     { text: 'Thống kê', icon: <BarChartIcon />, path: '/analytics' },
   ];
 
@@ -65,8 +65,8 @@ export default function ClippedDrawer({ children }) {
   const handleLogout = async () => {
     const confirmed = window.confirm("Bạn có chắc chắn muốn đăng xuất?");
     if (confirmed) {
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
+      localStorage.removeItem('MANAGER_user');
+      localStorage.removeItem('MANAGER_token');
       setUser(null);
       toast.info('Bạn đã đăng xuất tài khoản');
       navigate('/login-manager');
@@ -90,7 +90,7 @@ export default function ClippedDrawer({ children }) {
           </IconButton>
 
           <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
-            Hệ thống quản lý thiết bị điện tử
+            Dashboard
           </Typography>
 
           <IconButton color="inherit" onClick={handleAccountClick}>

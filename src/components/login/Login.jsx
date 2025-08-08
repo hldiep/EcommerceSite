@@ -16,7 +16,7 @@ const Login = () => {
         e.preventDefault();
         try {
             const data = await loginApi(username, password);
-            login(data.user, data.token);
+            login(data.user, data.token, 'CUSTOMER');
             toast.success('Đăng nhập thành công!');
             if (location.state?.from) {
                 navigate(location.state.from);

@@ -12,16 +12,16 @@ const SpecificationTable = ({ specString }) => {
 
     return (
         <table className="w-full border mt-4">
-            <thead>
+            {/* <thead>
                 <tr className="bg-gray-200">
                     <th className="text-left px-4 py-2 border">Thông số</th>
                     <th className="text-left px-4 py-2 border">Giá trị</th>
                 </tr>
-            </thead>
+            </thead> */}
             <tbody>
                 {Object.entries(parsedSpec).map(([key, value]) => (
                     <tr key={key} className="border-t">
-                        <td className="px-4 py-2 border">{key}</td>
+                        <td className="px-4 py-2 border bg-gray-100">{key}</td>
                         <td className="px-4 py-2 border">{value}</td>
                     </tr>
                 ))}
