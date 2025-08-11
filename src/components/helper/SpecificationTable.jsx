@@ -1,28 +1,24 @@
 import React from 'react';
 
-const SpecificationTable = ({ specString }) => {
-    let parsedSpec = {};
-
-    try {
-        // Bước 1: parse từ string JSON bị escape
-        parsedSpec = JSON.parse(JSON.parse(specString));
-    } catch (error) {
-        console.error("Lỗi parse specifications:", error);
-    }
+const SpecificationTable = ({ specifications }) => {
+    // Nếu truyền specs dưới dạng object, không cần parse JSON nữa
+    if (!specifications || typeof specifications !== 'object') return null;
 
     return (
-        <table className="w-full border mt-4">
-            {/* <thead>
-                <tr className="bg-gray-200">
-                    <th className="text-left px-4 py-2 border">Thông số</th>
-                    <th className="text-left px-4 py-2 border">Giá trị</th>
+        <table className="w-full border border-gray-300 rounded-md overflow-hidden mt-4 text-sm">
+            <thead className="bg-gray-100">
+                <tr>
+                    <th className="text-left px-4 py-2 border-b border-gray-300">Thông số</th>
+                    <th className="text-left px-4 py-2 border-b border-gray-300">Giá trị</th>
                 </tr>
-            </thead> */}
+            </thead>
             <tbody>
-                {Object.entries(parsedSpec).map(([key, value]) => (
-                    <tr key={key} className="border-t">
-                        <td className="px-4 py-2 border bg-gray-100">{key}</td>
-                        <td className="px-4 py-2 border">{value}</td>
+                {Object.entries(specifications).map(([key, value]) => (
+                    <tr key={key} className="odd:bg-white even:bg-gray-50">
+                        <td className="border-b border-gray-200 px-4 py-2 font-medium text-gray-700" style={{ minWidth: '180px' }}>
+                            {key}
+                        </td>
+                        <td className="border-b border-gray-200 px-4 py-2 text-gray-800" dangerouslySetInnerHTML={{ __html: value }} />
                     </tr>
                 ))}
             </tbody>

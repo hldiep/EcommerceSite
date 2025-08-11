@@ -14,6 +14,9 @@ const SearchResults = () => {
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
+
+    const [sortBy, setSortBy] = useState(null);
+    const [direction, setDirection] = useState(null);
     const fetchData = async (currentPage = 0, append = false) => {
         try {
             const data = await fetchProductsPublicWithPaging({ keyword, page: currentPage });

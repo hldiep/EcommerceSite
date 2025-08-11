@@ -36,7 +36,7 @@ const ProductManagerDetail = () => {
                         <span>/</span>
                         <button onClick={() => navigate('/products-manager')} className="hover:underline text-blue-600">Quản lý sản phẩm</button>
                         <span>/</span>
-                        <span className="text-gray-700 font-medium">Quản lý sản phẩm</span>
+                        <span className="text-gray-700 font-medium">Thông tin sản phẩm</span>
                     </div>
                     {!loading && product && (
                         <h2 className="text-xl font-semibold p-4">{product.name}</h2>
@@ -58,12 +58,21 @@ const ProductManagerDetail = () => {
                         </button>
                         <img src={product.imageUrl} alt={product.name} className="w-64" />
 
-                        <div className=" p-4 rounded">
+                        <div className="p-4 rounded">
                             <p><strong>Thương hiệu:</strong> {product.brand?.name}</p>
+                            <p style={{ whiteSpace: 'pre-line' }}>
+                                <strong>Mô tả:</strong> {product.description}
+                            </p>
                             <p><strong>Người tạo:</strong> {product.createdBy?.fullName}</p>
                             <p><strong>Ngày tạo:</strong> {new Date(product.createdAt).toLocaleString()}</p>
                             <p><strong>Thông số:</strong></p>
-                            <SpecificationTable specString={product.specifications.value} />
+                            <SpecificationTable specifications={
+                                product.specifications
+                                    ? (typeof product.specifications === 'string'
+                                        ? JSON.parse(product.specifications)
+                                        : product.specifications)
+                                    : {}
+                            } />
                         </div>
                         <h2 className="text-xl font-semibold mt-6">Biến thể</h2>
                         {product.productVariants?.length ? (

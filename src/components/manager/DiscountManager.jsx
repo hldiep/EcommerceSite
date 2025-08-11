@@ -209,8 +209,8 @@ const DiscountManager = () => {
                             <tr className="text-left">
                                 <th className="p-3">Code</th>
                                 <th className="p-3">Title</th>
-                                <th className="p-3">Mô tả</th>
                                 <th className="p-3">Thời gian</th>
+                                <th className="p-3">Mô tả</th>
                                 <th className="p-3">Giới hạn</th>
                             </tr>
                         </thead>
@@ -237,7 +237,9 @@ const DiscountManager = () => {
                                     >
                                         <td className="p-3">{item.code}</td>
                                         <td className="p-3">{item.title}</td>
-                                        <td className="p-3">{item.startAt} - {item.endAt}</td>
+                                        <td className="p-3">
+                                            {new Date(item.startAt).toLocaleDateString('vi-VN')} - {new Date(item.endAt).toLocaleDateString('vi-VN')}
+                                        </td>
                                         <td className="p-3">{item.description || '-'}</td>
                                         <td className="p-3">{item.usageLimit}</td>
                                     </tr>

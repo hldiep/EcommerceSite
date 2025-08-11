@@ -67,7 +67,7 @@ const Cart = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
-            <div className='container mt-20 mb-10'>
+            <div className='container mt-28 mb-10'>
                 <h2 className="text-center text-2xl font-bold mb-4">Giỏ hàng của bạn</h2>
 
                 <div className="bg-white p-4 rounded shadow-md max-w-5xl mx-auto">

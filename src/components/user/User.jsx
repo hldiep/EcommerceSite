@@ -3,16 +3,28 @@ import { FaHistory, FaHome, FaShoppingCart, FaSignOutAlt, FaTags, FaUserCircle }
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getHistory } from '../../api/order';
-
+const statusMap = {
+    PENDING: { label: "Chờ xử lý", color: "text-yellow-500" },
+    CONFIRMED: { label: "Đã xác nhận", color: "text-blue-500" },
+    PROCESSING: { label: "Đang xử lý", color: "text-indigo-500" },
+    SHIPPED: { label: "Đã giao cho đơn vị vận chuyển", color: "text-purple-500" },
+    DELIVERED: { label: "Đã giao hàng", color: "text-green-500" },
+    CANCELLED: { label: "Đã hủy", color: "text-red-500" },
+    RETURNED: { label: "Đã trả hàng", color: "text-orange-500" },
+    REFUNDED: { label: "Đã hoàn tiền", color: "text-pink-500" },
+    COMPLETED: { label: "Hoàn tất", color: "text-green-600" }
+};
 const User = () => {
     const totalOrders = 0;
     const [user, setUser] = useState(null);
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
     const [orderHistory, setOrderHistory] = useState([]);
+
     const [recentOrders, setRecentOrders] = useState([]);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [loading, setLoading] = useState(true);
     const handleLogout = () => {
         const confirmed = window.confirm("Bạn có chắc chắn muốn đăng xuất?");
         if (confirmed) {
@@ -28,13 +40,17 @@ const User = () => {
     }, [page]);
     const loadHistory = async () => {
         try {
+            setLoading(true);
             const data = await getHistory({
                 page,
+                size: 20,
             });
             setOrderHistory(data.data);
             setTotalPages(data.totalPages);
         } catch (error) {
             console.error('Lỗi tải lịch sử mua hàng:', error);
+        } finally {
+            setLoading(false);
         }
     }
     useEffect(() => {
@@ -46,7 +62,7 @@ const User = () => {
     }, []);
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
-            <div className='container mt-20 mb-10'>
+            <div className='container mt-28 mb-10'>
                 <div className="flex space-x-3  rounded-lg shadow-lg p-4 items-center bg-white">
                     <div className="flex space-x-4 border-r-2 border-red-600 pr-6 items-center">
                         <img
@@ -114,7 +130,7 @@ const User = () => {
                                 <h2 className="font-semibold text-lg mb-3">Tổng quan tài khoản</h2>
 
                                 <div className="mb-5">
-                                    <p className="text-gray-700 text-sm">Xin chào, <span className="font-medium">{user?.fullName}</span>!</p>
+                                    <p className="text-gray-700 text-sm">Xin chào, <span className="font-medium">{user?.fullName}</span>! Dưới đây là những đơn hàng gần nhất của bạn</p>
                                 </div>
 
                                 {orderHistory.length === 0 ? (
@@ -126,6 +142,9 @@ const User = () => {
                                                 <tr>
                                                     <th className="px-4 py-2 border">Mã đơn</th>
                                                     <th className="px-4 py-2 border">Ngày đặt</th>
+                                                    <th className="px-4 py-2 border">Người nhận</th>
+                                                    <th className="px-4 py-2 border">SĐT</th>
+                                                    <th className="px-4 py-2 border">Sản phẩm</th>
                                                     <th className="px-4 py-2 border">Tổng tiền</th>
                                                     <th className="px-4 py-2 border">Trạng thái</th>
                                                 </tr>
@@ -134,9 +153,37 @@ const User = () => {
                                                 {orderHistory.map(order => (
                                                     <tr key={order.id} className="hover:bg-gray-50">
                                                         <td className="px-4 py-2 border">{order.id}</td>
-                                                        <td className="px-4 py-2 border">{order.date}</td>
-                                                        <td className="px-4 py-2 border">{order.total.toLocaleString()} ₫</td>
-                                                        <td className="px-4 py-2 border">{order.status}</td>
+                                                        <td className="px-4 py-2 border">
+                                                            {order.orderTime ? new Date(order.orderTime).toLocaleString('vi-VN') : 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-2 border">{order.recipientName || 'N/A'}</td>
+                                                        <td className="px-4 py-2 border">{order.recipientPhone || 'N/A'}</td>
+                                                        <td className="px-4 py-2 border">
+                                                            {order.orderItems && order.orderItems.length > 0 ? (
+                                                                <ul className="list-disc pl-4">
+                                                                    {order.orderItems.map((item, idx) => (
+                                                                        <li key={idx}>
+                                                                            {item.productVariant?.name || `SP #${item.productVariant?.id}`}
+                                                                            {' - SL: '}{item.quantity}
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            ) : 'Không có sản phẩm'}
+                                                        </td>
+                                                        <td className="px-4 py-2 border">
+                                                            {(Number(order.totalAmount) || 0).toLocaleString('vi-VN')} ₫
+                                                        </td>
+                                                        <td className="px-4 py-2 border">
+                                                            {statusMap[order.status] ? (
+                                                                <span
+                                                                    className={`font-semibold rounded ${statusMap[order.status].color}`}
+                                                                >
+                                                                    {statusMap[order.status].label}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-gray-500">Không xác định</span>
+                                                            )}
+                                                        </td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -158,7 +205,7 @@ const User = () => {
                                 <h2 className="font-semibold text-lg mb-3">Lịch sử mua hàng</h2>
 
                                 {orderHistory.length === 0 ? (
-                                    <p className='text-sm text-gray-500'>Bạn chưa có đơn hàng nào.</p>
+                                    <p className="text-sm text-gray-500">Bạn chưa có đơn hàng nào.</p>
                                 ) : (
                                     <div className="overflow-x-auto">
                                         <table className="min-w-full border text-sm text-left">
@@ -166,20 +213,47 @@ const User = () => {
                                                 <tr>
                                                     <th className="px-4 py-2 border">Mã đơn</th>
                                                     <th className="px-4 py-2 border">Ngày đặt</th>
+                                                    <th className="px-4 py-2 border">Người nhận</th>
+                                                    <th className="px-4 py-2 border">SĐT</th>
+                                                    <th className="px-4 py-2 border">Sản phẩm</th>
                                                     <th className="px-4 py-2 border">Tổng tiền</th>
                                                     <th className="px-4 py-2 border">Trạng thái</th>
-                                                    <th className="px-4 py-2 border">Chi tiết</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {orderHistory.map(order => (
                                                     <tr key={order.id} className="hover:bg-gray-50">
                                                         <td className="px-4 py-2 border">{order.id}</td>
-                                                        <td className="px-4 py-2 border">{order.date}</td>
-                                                        <td className="px-4 py-2 border">{order.total.toLocaleString()} ₫</td>
-                                                        <td className="px-4 py-2 border">{order.status}</td>
-                                                        <td className="px-4 py-2 border text-blue-500 cursor-pointer hover:underline">
-                                                            Xem
+                                                        <td className="px-4 py-2 border">
+                                                            {order.orderTime ? new Date(order.orderTime).toLocaleString('vi-VN') : 'N/A'}
+                                                        </td>
+                                                        <td className="px-4 py-2 border">{order.recipientName || 'N/A'}</td>
+                                                        <td className="px-4 py-2 border">{order.recipientPhone || 'N/A'}</td>
+                                                        <td className="px-4 py-2 border">
+                                                            {order.orderItems && order.orderItems.length > 0 ? (
+                                                                <ul className="list-disc pl-4">
+                                                                    {order.orderItems.map((item, idx) => (
+                                                                        <li key={idx}>
+                                                                            {item.productVariant?.name || `SP #${item.productVariant?.id}`}
+                                                                            {' - SL: '}{item.quantity}
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            ) : 'Không có sản phẩm'}
+                                                        </td>
+                                                        <td className="px-4 py-2 border">
+                                                            {(Number(order.totalAmount) || 0).toLocaleString('vi-VN')} ₫
+                                                        </td>
+                                                        <td className="px-4 py-2 border">
+                                                            {statusMap[order.status] ? (
+                                                                <span
+                                                                    className={`font-semibold rounded ${statusMap[order.status].color}`}
+                                                                >
+                                                                    {statusMap[order.status].label}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-gray-500">Không xác định</span>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -187,6 +261,23 @@ const User = () => {
                                         </table>
                                     </div>
                                 )}
+                                <div className="flex justify-between items-center pt-4">
+                                    <button
+                                        disabled={page <= 0}
+                                        onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+                                        className={`px-4 py-2 rounded ${page <= 0 ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
+                                    >
+                                        Trang trước
+                                    </button>
+                                    <span>Trang {page + 1} / {totalPages}</span>
+                                    <button
+                                        disabled={page + 1 >= totalPages}
+                                        onClick={() => setPage((prev) => prev + 1)}
+                                        className={`px-4 py-2 rounded ${page + 1 >= totalPages ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
+                                    >
+                                        Trang sau
+                                    </button>
+                                </div>
                             </div>
                         )}
 

@@ -127,7 +127,7 @@ const InfoPayment = () => {
     const totalPrice = products.reduce((sum, item) => sum + item.price * item.quantity, 0);
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
-            <div className="container mt-20 mb-10">
+            <div className="container mt-28 mb-10">
                 <div className="flex items-center space-x-2 text-gray-700 mb-4">
                     <button onClick={() => navigate(-1)} className="hover:text-red-600 transition">
                         <FaChevronLeft />

@@ -79,7 +79,31 @@ export const fetchProductById = async (id) => {
         throw error;
     }
 };
+export const createProduct = async (payload) => {
+    try {
+        const token = localStorage.getItem('MANAGER_token');
+        const response = await fetch(`${API_URL}/add`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': '*/*',
+            },
+            body: JSON.stringify(payload),
+        });
 
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Tạo sản phẩm thất bại');
+        }
+
+        const json = await response.json();
+        return json.data;
+    } catch (err) {
+        console.error('Lỗi tạo sản phẩm:', err);
+        throw err;
+    }
+};
 //public
 export const fetchProductsPublicWithPaging = async ({
     keyword,

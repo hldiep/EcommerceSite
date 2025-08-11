@@ -8,7 +8,7 @@ const PaymentSuccess = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center items-center">
-            <div className="container mt-20 mb-10 px-4 text-center">
+            <div className="container mt-28 mb-10 px-4 text-center">
                 <img
                     src="https://cdn-icons-png.flaticon.com/512/190/190411.png"
                     alt="Đặt hàng thành công"

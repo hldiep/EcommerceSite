@@ -32,8 +32,10 @@ const Login = () => {
     return (
         <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 bg-white">
             <div className="bg-gray-100 p-8 flex flex-col justify-center">
-                <img onClick={() => navigate('/')}
-                    src="/images/logo-cellphone.png" alt="logo" className="h-10 mb-4" />
+                <div onClick={() => navigate('/')} className='text-4xl mb-5 font-bold text-red-600'>
+                    Logo
+                </div>
+
                 <h2 className="text-2xl font-semibold text-gray-800">
                     Nhập hội khách hàng thành viên <span className="text-red-600 font-bold">của chúng tôi</span>
                 </h2>

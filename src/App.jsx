@@ -31,6 +31,10 @@ import VerifyOtp from './components/login/VerifyOtp'
 import PaymentSuccess from './components/cart/PaymentSuccess'
 import OrderManager from './components/manager/OrderManager'
 import OrderManagerDetailPage from './components/manager/OrderManagerDetailPage'
+import CreditCardPayment from './components/cart/CreditCardPayment'
+import EmployeeManager from './components/manager/EmployeeManager'
+import RevenueManager from './components/manager/RevenueManager'
+import ProductManagerAdd from './components/manager/ProductManagerAdd'
 function App() {
 
   return (
@@ -38,7 +42,6 @@ function App() {
       <PageLoader />
       <ToastContainer position="top-right" autoClose={3000} style={{ zIndex: 10000 }} />
 
-      <ScrollToTop />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -58,6 +61,7 @@ function App() {
           <Route path="payment-info" element={<InfoPayment />} />
           <Route path="payment-continue" element={<PaymentPage />} />
           <Route path="payment-success" element={<PaymentSuccess />} />
+          <Route path="credit-card-payment" element={<CreditCardPayment />} />
         </Route>
 
         <Route path='/tongquan' element={<Tongquan />} />
@@ -67,12 +71,14 @@ function App() {
         <Route path="products-manager/option" element={<OptionManager />} />
         <Route path="products-manager/slide" element={<SlideManager />} />
         <Route path="products-manager/:id" element={<ProductManagerDetail />} />
+        <Route path="products-manager/add" element={<ProductManagerAdd />} />
         <Route path="discount-manager" element={<DiscountManager />} />
         <Route path="order-manager" element={<OrderManager />} />
         <Route path="order-manager/:id" element={<OrderManagerDetailPage />} />
-      </Routes>
-      <ScrollToTopButton />
+        <Route path="employee-manager" element={<EmployeeManager />} />
 
+        <Route path="analytics" element={<RevenueManager />} />
+      </Routes>
     </>
   );
 

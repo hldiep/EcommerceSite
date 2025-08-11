@@ -38,6 +38,20 @@ const PaymentPage = () => {
     const finalAmount = totalPrice - discountAmount + shipFee;
 
     const handlePayment = async () => {
+        if (selectedPaymentMethod === 'CREDIT_CARD') {
+            navigate('/credit-card-payment', {
+                state: {
+                    products,
+                    orderData,
+                    coupon,
+                    discount,
+                    shipFee,
+                    totalPrice,
+                    finalAmount
+                }
+            });
+            return;
+        }
         const items = products.map((item) => {
             const obj = {
                 productVariantId: item.productVariantId,
@@ -48,18 +62,18 @@ const PaymentPage = () => {
             }
             return obj;
         });
-        console.log("Items gửi lên:", items);
         const finalOrderData = {
             items,
             orderTime: new Date().toISOString(),
             note: orderData.note || "",
             deliveryAddress: orderData.deliveryAddress,
-            recipientName: orderData.fullName,
-            recipientPhone: orderData.phone,
+            recipientName: orderData.recipientName,
+            recipientPhone: orderData.recipientPhone,
             payment: {
                 method: selectedPaymentMethod,
             },
         };
+        console.log("Data gửi lên:", finalOrderData);
         if (coupon.trim()) {
             finalOrderData.discountCode = coupon.trim();
         }
@@ -74,7 +88,7 @@ const PaymentPage = () => {
     };
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
-            <div className="container mt-20 mb-10 px-4">
+            <div className="container mt-28 mb-10 px-4">
                 <div className="flex items-center space-x-2 text-gray-700 mb-4">
                     <button onClick={() => navigate(-1)} className="hover:text-red-600 transition">
                         <FaChevronLeft />

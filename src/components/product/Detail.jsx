@@ -139,9 +139,9 @@ const Detail = () => {
                     <FaHome className="text-gray-400" />
                     <button onClick={() => navigate('/')}
                         className="text-gray-700">Trang chủ</button>
-                    <span className="text-gray-700">/</span>
+                    {/* <span className="text-gray-700">/</span>
                     <button onClick={() => navigate('/mobile')}
-                        className="text-gray-700">Điện thoại</button>
+                        className="text-gray-700">Điện thoại</button> */}
                     <span className="text-gray-700">/</span>
                     <button
                         onClick={() => navigate(`/brand/${product.brand?.id}`)}
@@ -332,8 +332,14 @@ const Detail = () => {
                         </div>
                         <div className="w-2/3 mt-10" ref={specificationRef}>
                             <h2 className="text-xl font-semibold mb-2">Thông số kỹ thuật</h2>
-                            {product?.specifications?.value && (
-                                <SpecificationTable specString={product.specifications.value} />
+                            {product?.specifications && Object.keys(product.specifications).length > 0 && (
+                                <SpecificationTable
+                                    specifications={
+                                        typeof product.specifications === 'string'
+                                            ? JSON.parse(product.specifications)
+                                            : product.specifications
+                                    }
+                                />
                             )}
                         </div>
                     </div>

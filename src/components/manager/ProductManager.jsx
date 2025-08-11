@@ -22,7 +22,7 @@ const ProductManager = () => {
     const [brands, setBrands] = useState([]);
     const [categories, setCategories] = useState([]);
     const [sortBy, setSortBy] = useState('id');
-    const [direction, setDirection] = useState('asc');
+    const [direction, setDirection] = useState('desc');
     useEffect(() => {
         const loadCategories = async () => {
             try {
@@ -82,7 +82,17 @@ const ProductManager = () => {
     useEffect(() => {
         loadProducts();
     }, [page, size, keyword, brandId, categoryId, status, sortBy, direction]);
-
+    const handleChange = (e) => {
+        const { name, value, options, type, multiple } = e.target;
+        if (multiple) {
+            const selectedValues = Array.from(options)
+                .filter((option) => option.selected)
+                .map((option) => option.value);
+            setForm({ ...form, [name]: selectedValues });
+        } else {
+            setForm({ ...form, [name]: value });
+        }
+    };
     const handleSearch = () => setPage(0);
     const [expandedRows, setExpandedRows] = useState([]);
 
@@ -226,9 +236,8 @@ const ProductManager = () => {
                         </button>
                     </div>
 
-                    {/* Nút thêm sản phẩm */}
                     <button
-                        onClick={() => navigate('/them-san-pham')}
+                        onClick={() => navigate('/products-manager/add')}
                         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded h-fit"
                     >
                         Thêm

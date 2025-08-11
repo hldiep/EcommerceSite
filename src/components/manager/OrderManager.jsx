@@ -11,7 +11,7 @@ const OrderManager = () => {
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [sortBy, setSortBy] = useState('id');
-    const [direction, setDirection] = useState('asc');
+    const [direction, setDirection] = useState('desc');
     const loadOrder = async () => {
         try {
             const data = await getOrder({
@@ -102,11 +102,6 @@ const OrderManager = () => {
                             <option value="desc">Giảm dần</option>
                         </select>
                     </div>
-                    <button
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded ml-2"
-                    >
-                        Thêm
-                    </button>
                 </div>
                 {loading ? (
                     <div className="flex justify-center items-center py-10">
@@ -188,23 +183,23 @@ const OrderManager = () => {
                         </tbody>
                     </table>
                 )}
-            </div>
-            <div className="flex justify-between items-center pt-4">
-                <button
-                    disabled={page <= 0}
-                    onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                    className={`px-4 py-2 rounded ${page <= 0 ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
-                >
-                    Trang trước
-                </button>
-                <span>Trang {page + 1} / {totalPages}</span>
-                <button
-                    disabled={page + 1 >= totalPages}
-                    onClick={() => setPage((prev) => prev + 1)}
-                    className={`px-4 py-2 rounded ${page + 1 >= totalPages ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
-                >
-                    Trang sau
-                </button>
+                <div className="flex justify-between items-center pt-4">
+                    <button
+                        disabled={page <= 0}
+                        onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+                        className={`px-4 py-2 rounded ${page <= 0 ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
+                    >
+                        Trang trước
+                    </button>
+                    <span>Trang {page + 1} / {totalPages}</span>
+                    <button
+                        disabled={page + 1 >= totalPages}
+                        onClick={() => setPage((prev) => prev + 1)}
+                        className={`px-4 py-2 rounded ${page + 1 >= totalPages ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
+                    >
+                        Trang sau
+                    </button>
+                </div>
             </div>
         </ClippedDrawer>
 
