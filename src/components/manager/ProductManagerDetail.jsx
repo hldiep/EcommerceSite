@@ -74,7 +74,15 @@ const ProductManagerDetail = () => {
                                     : {}
                             } />
                         </div>
-                        <h2 className="text-xl font-semibold mt-6">Biến thể</h2>
+                        <div className='flex justify-between'>
+                            <h2 className="text-xl font-semibold">Biến thể</h2>
+                            <button
+                                onClick={() => navigate(`/products-manager/add/variant/${product.id}`)}
+                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded h-fit"
+                            >
+                                Thêm
+                            </button>
+                        </div>
                         {product.productVariants?.length ? (
                             <table className="w-full table-auto border text-sm mt-2">
                                 <thead className="bg-gray-100">

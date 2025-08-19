@@ -1,20 +1,51 @@
 import React, { useEffect, useState } from 'react'
 import { fetchOptionsWithPaging } from '../../api/option';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import ClippedDrawer from '../dashboard/DashboardLayoutBasic';
-import { createProduct } from '../../api/product';
-import { fetchBrandsWithPaging } from '../../api/brand';
 import { toast } from 'react-toastify';
 import { upload } from '../../api/upload-file';
 import Select from 'react-select';
+import { createProductVariant } from '../../api/product-variant';
+import { fetchSupplierWithPaging } from '../../api/supplier';
 const ProductManagerAddVariant = () => {
     const navigate = useNavigate();
     const [options, setOptions] = useState([]);
-    const [brands, setBrands] = useState([]);
+    const [suppliers, setSuppliers] = useState([]);
     const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState('');
     const optionSelectData = options.map(opt => ({ value: opt.id, label: opt.name }));
+    const { id } = useParams();
+    const [images, setImages] = useState([]);
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
+        setIsUploading(true);
+
+        try {
+            const imageUrl = await upload(file); // API upload trả về link
+            console.log("Link ảnh trả về từ upload:", imageUrl);
+
+            setForm((prev) => ({
+                ...prev,
+                imageUrl: [...prev.imageUrl, imageUrl], // lưu thêm vào mảng
+            }));
+
+            setError('');
+        } catch (err) {
+            console.error("Lỗi upload ảnh:", err);
+            setError("Không thể tải ảnh lên. Vui lòng thử lại.");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const handleRemoveImage = (url) => {
+        setForm((prev) => ({
+            ...prev,
+            imageUrl: prev.imageUrl.filter((img) => img !== url),
+        }));
+    };
     useEffect(() => {
         const loadOptions = async () => {
             try {
@@ -28,26 +59,38 @@ const ProductManagerAddVariant = () => {
         loadOptions();
     }, []);
     useEffect(() => {
-        const loadBrands = async () => {
+        const loadSupplier = async () => {
             try {
-                const data = await fetchBrandsWithPaging({ page: 0, size: 100 });
-                setBrands(data.data || []);
+                const data = await fetchSupplierWithPaging({ page: 0, size: 100 });
+                console.log('Data', data)
+                setSuppliers(data.data || []);
             } catch (error) {
-                console.error('Lỗi tải thương hiệu:', error);
+                console.error('Lỗi tải supplier:', error);
             }
         };
 
-        loadBrands();
+        loadSupplier();
     }, []);
+
     const [form, setForm] = useState({
-        name: "",
-        seoName: "",
+        productId: '',
+        name: '',
+        seoName: '',
+        price: '',
+        priceSale: '',
+        quantity: '',
+        sku: '',
+        model: '',
+        inventoryPolicy: 'DENY',
+        warranty: '',
+        barcode: '',
+        release_at: '',
+        imageUrl: [],
         specifications: [{ key: '', value: '' }],
-        description: "",
-        imageUrl: "",
-        status: "ACTIVE",
-        brandId: "",
-        optionIds: [],
+        description: '',
+        supplierId: '',
+        status: 'ACTIVE',
+        optionValueIds: '',
     });
     const [loading, setLoading] = useState(false);
 
@@ -68,66 +111,56 @@ const ProductManagerAddVariant = () => {
         });
 
         const payload = {
+            productId: id,
             name: form.name,
             seoName: form.seoName,
+            price: Number(form.price),
+            priceSale: Number(form.priceSale),
+            quantity: Number(form.quantity),
+            sku: form.sku,
+            model: form.model,
+            inventoryPolicy: form.inventoryPolicy,
+            warranty: form.warranty,
+            barcode: form.barcode,
+            release_at: form.release_at
+                ? new Date(form.release_at).toISOString()
+                : null,
+            imageUrl: form.imageUrl || [],
             specifications: specsObject,
             description: form.description,
-            imageUrl: form.imageUrl,
+            supplierId: form.supplierId,
             status: form.status,
-            brandId: Number(form.brandId),
-            optionIds: form.optionIds,
+            optionValueIds: form.optionIds || [],
         };
         console.log('Dữ liệu tải lên', payload);
         try {
             setLoading(true);
-            await createProduct(payload);
+            await createProductVariant(payload);
             toast.success("Tạo sản phẩm thành công!");
             setForm({
-                name: "",
-                seoName: "",
-                description: "",
-                imageUrl: "",
-                status: "ACTIVE",
-                brandId: "",
-                optionIds: "",
-                specifications: [{ key: '', value: '' }]
+                productId: '',
+                name: '',
+                seoName: '',
+                price: '',
+                priceSale: '',
+                quantity: '',
+                sku: '',
+                model: '',
+                inventoryPolicy: 'DENY',
+                warranty: '',
+                barcode: '',
+                release_at: '',
+                imageUrl: [],
+                specifications: [{ key: '', value: '' }],
+                description: '',
+                supplierId: '',
+                status: 'ACTIVE',
+                optionValueIds: '',
             });
         } catch (err) {
             toast.error("Tạo sản phẩm thất bại!");
         } finally {
             setLoading(false);
-        }
-    };
-    const handleSpecChange = (key, value) => {
-        setForm(prev => ({
-            ...prev,
-            specifications: {
-                ...prev.specifications,
-                [key]: value
-            }
-        }));
-    };
-    const handleImageUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        setIsUploading(true);
-
-        try {
-            const imageUrl = await upload(file);
-            console.log("Link ảnh trả về từ upload:", imageUrl);
-
-            setForm((prev) => ({
-                ...prev,
-                imageUrl: imageUrl,
-            }));
-
-            setError('');
-        } catch (err) {
-            console.error("Lỗi upload ảnh:", err);
-            setError("Không thể tải ảnh lên. Vui lòng thử lại.");
-        } finally {
-            setIsUploading(false);
         }
     };
     const setSpecifications = (specs) => {
@@ -148,100 +181,138 @@ const ProductManagerAddVariant = () => {
                     </div>
                     <h2 className="text-xl font-semibold p-4">Thêm biến thể sản phẩm</h2>
                 </div>
-                <form onSubmit={handleSubmit} >
-                    <div className="mt-6 grid grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Tên sản phẩm
-                            </label>
-                            <input type="text" name="name" value={form.name} onChange={handleChange} required className="border px-3 py-2 rounded w-full outline-none" />
+                <form onSubmit={handleSubmit} className="space-y-8">
+
+                    {/* Nhóm 1: Thông tin cơ bản */}
+                    <div className="bg-white p-4 rounded shadow">
+                        <h3 className="font-semibold text-lg mb-4">Thông tin cơ bản</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <input name="name" value={form.name} onChange={handleChange} placeholder="Tên biến thể" required className="border p-2 rounded outline-none" />
+                            <input name="seoName" value={form.seoName} onChange={handleChange} placeholder="SEO Name" className="border p-2 rounded outline-none" />
+                            <textarea name="description" value={form.description} onChange={handleChange} rows="3" placeholder="Mô tả" className="border p-2 rounded col-span-2 outline-none" />
+                            <SpecificationsInput specifications={form.specifications} setSpecifications={setSpecifications} />
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                SEO Name
-                            </label>
-                            <input type="text" name="seoName" value={form.seoName} onChange={handleChange} required className="border px-3 py-2 rounded w-full outline-none" />
+                    </div>
+
+                    {/* Nhóm 2: Giá & Kho */}
+                    <div className="bg-white p-4 rounded shadow">
+                        <h3 className="font-semibold text-lg mb-4">Giá & Kho</h3>
+                        <div className="grid grid-cols-3 gap-4">
+                            <input type="number" name="price" value={form.price} onChange={handleChange} placeholder="Giá" className="border p-2 rounded outline-none" />
+                            <input type="number" name="priceSale" value={form.priceSale} onChange={handleChange} placeholder="Giá sale" className="border p-2 rounded outline-none" />
+                            <input type="number" name="quantity" value={form.quantity} onChange={handleChange} placeholder="Số lượng" className="border p-2 rounded outline-none" />
+                            <input name="sku" value={form.sku} onChange={handleChange} placeholder="SKU" className="border p-2 rounded outline-none" />
+                            <input name="model" value={form.model} onChange={handleChange} placeholder="Model" className="border p-2 rounded outline-none" />
+                            <select name="inventoryPolicy" value={form.inventoryPolicy} onChange={handleChange} className="border p-2 rounded outline-none">
+                                <option value="DENY">Không cho đặt khi hết hàng</option>
+                                <option value="ALLOW">Cho đặt khi hết hàng</option>
+                            </select>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Mô tả
-                            </label>
-                            <textarea name="description" value={form.description} onChange={handleChange} rows="3" className="border px-3 py-2 rounded w-full outline-none" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Thông số kỹ thuật</label>
-                            <SpecificationsInput
-                                specifications={form.specifications}
-                                setSpecifications={setSpecifications}
-                            />
-                        </div>
-                        <div>
+                    </div>
+                    <div className="bg-white p-4 rounded shadow">
+                        <h3 className="font-semibold text-lg mb-4">Ngày phát hành</h3>
+                        <input
+                            type="date"
+                            name="release_at"
+                            value={form.release_at}
+                            onChange={handleChange}
+                            className="border p-2 rounded outline-none"
+                        />
+                    </div>
+                    <div className="bg-white p-4 rounded shadow">
+                        <h3 className="font-semibold text-lg mb-4">Nhà cung cấp</h3>
+                        <Select
+                            options={suppliers.map(supplier => ({
+                                value: supplier.id,
+                                label: supplier.name
+                            }))}
+                            value={suppliers
+                                .map(supplier => ({
+                                    value: supplier.id,
+                                    label: supplier.name
+                                }))
+                                .find(option => option.value === form.supplierId) || null}
+                            onChange={(selectedOption) =>
+                                setForm(prev => ({
+                                    ...prev,
+                                    supplierId: selectedOption ? selectedOption.value : ""
+                                }))
+                            }
+                            placeholder="Chọn nhà cung cấp..."
+                        />
+                    </div>
+                    {/* Nhóm 3: Hình ảnh & Trạng thái */}
+                    <div className="bg-white p-4 rounded shadow">
+                        <h3 className="font-semibold text-lg mb-4">Hình ảnh & Trạng thái</h3>
+                        <div className="grid grid-cols-2 gap-4 items-center">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Ảnh sản phẩm
-                                </label>
                                 <input
                                     type="file"
                                     accept="image/*"
+                                    multiple
                                     onChange={handleImageUpload}
                                     className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
-               file:rounded file:border-0 file:text-sm file:font-semibold
-               file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+      file:rounded file:border-0 file:text-sm file:font-semibold
+      file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                                 />
-                                {isUploading && (
-                                    <p className="text-blue-600 text-sm mt-1">Đang tải ảnh lên...</p>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Trạng thái
-                                    <select name="status" value={form.status} onChange={handleChange} className="border px-3 py-2 rounded w-full outline-none">
-                                        <option value="ACTIVE">ACTIVE</option>
-                                        <option value="INACTIVE">INACTIVE</option>
-                                        <option value="DELETED">DELETED</option>
-                                    </select>
-                                </label>
-                            </div>
-                        </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Brand
-                            </label>
-                            <select
-                                name="brandId"
-                                value={form.brandId}
-                                onChange={handleChange}
-                                className="border px-4 py-2 rounded w-52 outline-none"
-                            >
-                                <option value="">-- Thương hiệu --</option>
-                                {brands.map((b) => (
-                                    <option key={b.id} value={b.id.toString()}>
-                                        {b.name}
-                                    </option>
-                                ))}
+                                {form.imageUrl && form.imageUrl.length > 0 && (
+                                    <div className="flex gap-2 mt-2 flex-wrap">
+                                        {form.imageUrl.map((url, index) => (
+                                            <div key={index} className="relative">
+                                                <img
+                                                    src={url}
+                                                    alt={`Preview ${index}`}
+                                                    className="w-32 h-32 object-cover rounded"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const updatedImages = form.imageUrl.filter((_, i) => i !== index);
+                                                        setForm({ ...form, imageUrl: updatedImages });
+                                                    }}
+                                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs hover:bg-red-600"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {isUploading && <p className="text-blue-500 text-sm mt-1">Đang tải ảnh...</p>}
+                            </div>
+                            <select name="status" value={form.status} onChange={handleChange} className="border p-2 rounded outline-none">
+                                <option value="ACTIVE">Đang bán</option>
+                                <option value="INACTIVE">Ngừng bán</option>
+                                <option value="DELETED">Đã xóa</option>
                             </select>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Option
-                            </label>
+                    </div>
+
+                    {/* Nhóm 4: Liên kết & Thuộc tính */}
+                    <div className="bg-white p-4 rounded shadow">
+                        <h3 className="font-semibold text-lg mb-4">Liên kết & Thuộc tính</h3>
+                        <div className="grid grid-cols-2 gap-4">
                             <Select
                                 isMulti
                                 options={optionSelectData}
-                                value={optionSelectData.filter(opt => form.optionIds.includes(opt.value))}
+                                value={optionSelectData.filter(opt => form.optionIds?.includes(opt.value))}
                                 onChange={handleOptionChange}
                                 className="w-full"
                                 classNamePrefix="select"
                                 placeholder="Chọn option..."
                             />
+                            <input name="barcode" value={form.barcode} onChange={handleChange} placeholder="Barcode" className="border p-2 rounded outline-none" />
+                            <input name="warranty" value={form.warranty} onChange={handleChange} placeholder="Bảo hành" className="border p-2 rounded outline-none" />
                         </div>
                     </div>
-                    <button type="submit" disabled={loading} className="mt-5 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                        {loading ? "Đang tạo..." : "Tạo sản phẩm"}
+
+                    {/* Nút submit */}
+                    <button type="submit" disabled={loading} className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+                        {loading ? "Đang tạo..." : "Tạo biến thể"}
                     </button>
                 </form>
-
             </div>
         </ClippedDrawer>
     )

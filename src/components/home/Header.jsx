@@ -61,12 +61,13 @@ const Header = () => {
         }
     };
     const handleCartClick = () => {
-        if (user && role === 'CUSTOMER') {
-            navigate('/cart');
-        } else {
-            toast.info('Vui lòng đăng nhập tài khoản khách hàng để xem giỏ hàng');
-            setShowModal(true);
-        }
+        navigate('/cart');
+        // if (user && role === 'CUSTOMER') {
+        //     navigate('/cart');
+        // } else {
+        //     toast.info('Vui lòng đăng nhập tài khoản khách hàng để xem giỏ hàng');
+        //     setShowModal(true);
+        // }
     };
     return (
         <header className="fixed top-0 left-0 w-full z-50 bg-gradient-to-r from-red-600 to-red-500 text-white px-4 py-3">

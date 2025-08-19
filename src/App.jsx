@@ -1,7 +1,5 @@
 import { Route, Routes, useLocation } from 'react-router-dom'
 import Home from './components/home/Home'
-import ScrollToTopButton from './components/home/ScrollToTopButton'
-import ScrollToTop from './components/helper/ScrollToTop'
 import Brand from './components/category/Brand'
 import Register from './components/login/Register'
 import Login from './components/login/Login'
@@ -11,7 +9,6 @@ import User from './components/user/User'
 import { ToastContainer } from 'react-toastify'
 import Cart from './components/cart/Cart'
 import PageLoader from './components/helper/PageLoader'
-import InputSdt from './components/login/InputSdt'
 import CustomerLayout from './components/layout/CustomerLayout'
 import InfoPayment from './components/cart/InfoPayment'
 import PaymentPage from './components/cart/PaymentPage'
@@ -35,6 +32,16 @@ import CreditCardPayment from './components/cart/CreditCardPayment'
 import EmployeeManager from './components/manager/EmployeeManager'
 import RevenueManager from './components/manager/RevenueManager'
 import ProductManagerAdd from './components/manager/ProductManagerAdd'
+import CustomerManager from './components/manager/CustomerManager'
+import ProductManagerAddVariant from './components/manager/ProductManagerAddVariant'
+import InputEmail from './components/login/InputEmail'
+import XacMinhEmail from './components/login/XacMinhEmail'
+import NewPass from './components/login/NewPass'
+import QuickOrder from './components/product/QuickOrder'
+import ThanhToan from './components/product/ThanhToan'
+import VerifyOtp2 from './components/product/VerifyOtp2'
+import ConfirmOrder from './components/product/ConfirmOrder'
+import ProductManagerEdit from './components/manager/ProductEdit'
 function App() {
 
   return (
@@ -46,7 +53,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/register/verify-otp" element={<VerifyOtp />} />
-        <Route path="/restore-password" element={<InputSdt />} />
+        <Route path="/restore-password" element={<InputEmail />} />
+        <Route path="/restore-password/otp" element={<XacMinhEmail />} />
+        <Route path="/restore-password/otp/newpass" element={<NewPass />} />
         <Route path="/login-manager" element={<LoginManager />} />
 
         <Route path="/" element={<CustomerLayout />}>
@@ -58,6 +67,10 @@ function App() {
           <Route path="profile" element={<User />} />
           <Route path="search" element={<SearchResults />} />
           <Route path="cart" element={<Cart />} />
+          <Route path="quick-order" element={<QuickOrder />} />
+          <Route path="quick-order/verify-otp" element={<VerifyOtp2 />} />
+          <Route path="checkout/confirm" element={<ConfirmOrder />} />
+          <Route path="quick-order/continue" element={<ThanhToan />} />
           <Route path="payment-info" element={<InfoPayment />} />
           <Route path="payment-continue" element={<PaymentPage />} />
           <Route path="payment-success" element={<PaymentSuccess />} />
@@ -71,12 +84,14 @@ function App() {
         <Route path="products-manager/option" element={<OptionManager />} />
         <Route path="products-manager/slide" element={<SlideManager />} />
         <Route path="products-manager/:id" element={<ProductManagerDetail />} />
+        <Route path="products-manager/edit/:id" element={<ProductManagerEdit />} />
         <Route path="products-manager/add" element={<ProductManagerAdd />} />
+        <Route path="products-manager/add/variant/:id" element={<ProductManagerAddVariant />} />
         <Route path="discount-manager" element={<DiscountManager />} />
         <Route path="order-manager" element={<OrderManager />} />
         <Route path="order-manager/:id" element={<OrderManagerDetailPage />} />
         <Route path="employee-manager" element={<EmployeeManager />} />
-
+        <Route path="customer-manager" element={<CustomerManager />} />
         <Route path="analytics" element={<RevenueManager />} />
       </Routes>
     </>

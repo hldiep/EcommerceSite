@@ -77,15 +77,20 @@ const Tongquan = () => {
         setLoading(false);
     };
 
+    const formatDateLocal = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     useEffect(() => {
         const today = new Date();
         const prior = new Date(today);
         prior.setDate(today.getDate() - 6);
 
-        const formatDate = (d) => d.toISOString().split("T")[0];
-
-        setFrom(formatDate(prior));
-        setTo(formatDate(today));
+        setFrom(formatDateLocal(prior));
+        setTo(formatDateLocal(today));
     }, []);
 
     useEffect(() => {
@@ -159,8 +164,28 @@ const Tongquan = () => {
                     {error && (
                         <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded">{error}</div>
                     )}
-
-
+                    <div className="lg:col-span-2 bg-white rounded-2xl shadow p-4 h-96">
+                        <h3 className="text-lg font-medium mb-2">Doanh thu theo thời gian</h3>
+                        {barData.length === 0 ? (
+                            <div className="h-full flex items-center justify-center text-gray-500">Không có dữ liệu</div>
+                        ) : (
+                            <ResponsiveContainer width="100%" height="85%">
+                                <BarChart data={barData} margin={{ top: 10, right: 20, left: 0, bottom: 40 }}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} />
+                                    <YAxis />
+                                    <ReTooltip formatter={(value) => new Intl.NumberFormat('vi-VN').format(value)} />
+                                    <Bar
+                                        dataKey="revenue"
+                                        name="Doanh thu"
+                                        fill="#4F46E5"
+                                        radius={[6, 6, 0, 0]}
+                                        barSize={30}
+                                    />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
+                    </div>
                     <div className="lg:col-span-1 bg-white rounded-2xl shadow p-4 h-96">
                         <h3 className="text-lg font-medium mb-2">Phân bổ theo danh mục</h3>
                         {pieData.length === 0 ? (
@@ -176,23 +201,6 @@ const Tongquan = () => {
                                     <ReTooltip />
                                     <ReLegend verticalAlign="bottom" height={36} />
                                 </PieChart>
-                            </ResponsiveContainer>
-                        )}
-                    </div>
-
-                    <div className="lg:col-span-2 bg-white rounded-2xl shadow p-4 h-96">
-                        <h3 className="text-lg font-medium mb-2">Doanh thu theo thời gian</h3>
-                        {barData.length === 0 ? (
-                            <div className="h-full flex items-center justify-center text-gray-500">Không có dữ liệu</div>
-                        ) : (
-                            <ResponsiveContainer width="100%" height="85%">
-                                <BarChart data={barData} margin={{ top: 10, right: 20, left: 0, bottom: 40 }}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} />
-                                    <YAxis />
-                                    <ReTooltip formatter={(value) => new Intl.NumberFormat('vi-VN').format(value)} />
-                                    <Bar dataKey="revenue" name="Doanh thu" fill="#4F46E5" radius={[6, 6, 0, 0]} />
-                                </BarChart>
                             </ResponsiveContainer>
                         )}
                     </div>

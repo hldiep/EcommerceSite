@@ -2,51 +2,60 @@ import React, { useState, useEffect } from 'react';
 import { FaChevronLeft } from 'react-icons/fa';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-const HCM_LOCATIONS = {
-    "Quận 1": ["Phường Bến Nghé", "Phường Bến Thành", "Phường Nguyễn Thái Bình"],
-    "Thủ Đức": ["Phường Linh Trung", "Phường Linh Đông", "Phường Hiệp Bình Chánh"],
-    "Quận 3": ["Phường Võ Thị Sáu", "Phường 6", "Phường 7"]
-};
+import Select from 'react-select';
 const InfoPayment = () => {
     const navigate = useNavigate();
     const location = useLocation();
+
     const singleProduct = location.state?.product;
     const cartProducts = location.state?.cartProducts;
     const products = singleProduct ? [singleProduct] : cartProducts;
-    const product = location.state?.product;
 
     useEffect(() => {
         if (!products || products.length === 0) {
             navigate('/');
         }
     }, [products, navigate]);
+
     const [user, setUser] = useState(null);
     const [role, setRole] = useState(null);
+
+    const [addressOption, setAddressOption] = useState("new");
+    const [provinceOptions, setProvinceOptions] = useState([]);
+    const [districtOptions, setDistrictOptions] = useState([]);
+    const [wardOptions, setWardOptions] = useState([]);
+    const formatCurrency = (num) =>
+        num.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
     useEffect(() => {
         const storedUser = localStorage.getItem('CUSTOMER_user');
         const storedRole = 'CUSTOMER';
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
             setRole(storedRole);
+
+            // Nếu user có địa chỉ, mặc định chọn "saved"
+            if (parsedUser.address) {
+                setAddressOption("saved");
+            }
         } else {
             setUser(null);
             setRole(null);
+            setAddressOption("new");
         }
     }, []);
-
-    const formatCurrency = (num) =>
-        num.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
 
     const [formData, setFormData] = useState({
         recipientName: "",
         recipientPhone: "",
-        city: "Hồ Chí Minh",
+        city: "",
         district: "",
         ward: "",
         address: "",
         deliveryAddress: "",
         note: "",
     });
+
     useEffect(() => {
         if (user) {
             setFormData(prev => ({
@@ -56,26 +65,38 @@ const InfoPayment = () => {
             }));
         }
     }, [user]);
-    const [districtOptions, setDistrictOptions] = useState([]);
-    const [wardOptions, setWardOptions] = useState([]);
+
+
     useEffect(() => {
-        if (formData.city === "Hồ Chí Minh") {
-            setDistrictOptions(Object.keys(HCM_LOCATIONS));
-        } else {
-            setDistrictOptions([]);
+        fetch("https://provinces.open-api.vn/api/?depth=1")
+            .then(res => res.json())
+            .then(data => {
+                setProvinceOptions(data);
+            })
+            .catch(err => console.error("Lỗi tải tỉnh/thành:", err));
+    }, []);
+    useEffect(() => {
+        if (formData.city) {
+            fetch(`https://provinces.open-api.vn/api/p/${formData.city}?depth=2`)
+                .then(res => res.json())
+                .then(data => {
+                    setDistrictOptions(data.districts || []);
+                    setWardOptions([]);
+                    setFormData(prev => ({ ...prev, district: "", ward: "" }));
+                })
+                .catch(err => console.error("Lỗi tải quận/huyện:", err));
         }
-        setFormData((prev) => ({
-            ...prev, district: "", ward: ""
-        }));
-        setWardOptions([]);
     }, [formData.city]);
     useEffect(() => {
-        if (formData.district && HCM_LOCATIONS[formData.district]) {
-            setWardOptions(HCM_LOCATIONS[formData.district]);
-        } else {
-            setWardOptions([]);
+        if (formData.district) {
+            fetch(`https://provinces.open-api.vn/api/d/${formData.district}?depth=2`)
+                .then(res => res.json())
+                .then(data => {
+                    setWardOptions(data.wards || []);
+                    setFormData(prev => ({ ...prev, ward: "" }));
+                })
+                .catch(err => console.error("Lỗi tải phường/xã:", err));
         }
-        setFormData((prev) => ({ ...prev, ward: "" }));
     }, [formData.district]);
 
     const handleChange = (e) => {
@@ -87,31 +108,58 @@ const InfoPayment = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (
-            !formData.recipientName.trim() ||
-            !formData.recipientPhone.trim() ||
-            !formData.city.trim() ||
-            !formData.district.trim() ||
-            !formData.ward.trim() ||
-            !formData.address.trim()
-        ) {
-            toast.error("Vui lòng nhập đầy đủ thông tin nhận hàng!");
-            return;
+
+        let deliveryAddress = "";
+        let recipientName = "";
+        let recipientPhone = "";
+
+        if (addressOption === "saved") {
+            if (!user?.address || !user?.fullName || !user?.phone) {
+                toast.error("Địa chỉ lưu không hợp lệ, vui lòng nhập địa chỉ mới.");
+                setAddressOption("new");
+                return;
+            }
+            deliveryAddress = user.address;
+            recipientName = user.fullName;
+            recipientPhone = user.phone;
+        } else {
+            if (
+                !formData.recipientName.trim() ||
+                !formData.recipientPhone.trim() ||
+                !formData.city ||
+                !formData.district ||
+                !formData.ward ||
+                !formData.address.trim()
+            ) {
+                toast.error("Vui lòng nhập đầy đủ thông tin nhận hàng!");
+                return;
+            }
+
+            const cityName = provinceOptions.find(p => p.code === Number(formData.city))?.name || "";
+            const districtName = districtOptions.find(d => d.code === Number(formData.district))?.name || "";
+            const wardName = wardOptions.find(w => w.code === Number(formData.ward))?.name || "";
+
+            deliveryAddress = [formData.address, wardName, districtName, cityName]
+                .filter(Boolean)
+                .join(", ");
+            recipientName = formData.recipientName;
+            recipientPhone = formData.recipientPhone;
         }
+
         const items = products.map((item) => ({
             productVariantId: item.productVariantId,
             quantity: item.quantity,
             discountCode: ""
         }));
-        const deliveryAddress = `${formData.address}, ${formData.ward}, ${formData.district}, ${formData.city}`;
+
         const orderData = {
             items,
             discountCode: "",
             orderTime: new Date().toISOString(),
             note: formData.note || "",
             deliveryAddress,
-            recipientName: formData.recipientName,
-            recipientPhone: formData.recipientPhone,
+            recipientName,
+            recipientPhone,
         };
 
         navigate('/payment-continue', {
@@ -124,7 +172,9 @@ const InfoPayment = () => {
     };
 
     if (!products || !user) return null;
+
     const totalPrice = products.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
             <div className="container mt-28 mb-10">
@@ -140,7 +190,6 @@ const InfoPayment = () => {
                         <div className="px-4 py-2 text-gray-500">2. THANH TOÁN</div>
                     </div>
 
-                    {/* Thông tin sản phẩm */}
                     {products.map((product, index) => (
                         <div key={index} className="bg-white rounded-lg p-4 shadow mb-4 flex">
                             <img src={product.imageUrl} alt={product.name} className="w-24 h-24 object-cover rounded" />
@@ -169,89 +218,136 @@ const InfoPayment = () => {
                         <p className="text-xs text-gray-400 mt-2">(*) Hóa đơn VAT sẽ được gửi qua email này</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="mb-4 bg-white p-4 rounded shadow space-y-4">
+                    {/* Chọn địa chỉ nhận hàng */}
+                    <div className="bg-white p-4 rounded shadow space-y-4 mb-5">
                         <h2 className="text-xl font-bold">THÔNG TIN NHẬN HÀNG</h2>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label>Tên người nhận</label>
+                        {user?.address && (
+                            <label className="flex items-start space-x-2 cursor-pointer">
                                 <input
-                                    type="text"
-                                    name="recipientName"
-                                    value={formData.recipientName}
-                                    onChange={handleChange}
-                                    className="border w-full p-2 rounded outline-none mt-2"
-                                    required
+                                    type="radio"
+                                    name="addressOption"
+                                    value="saved"
+                                    checked={addressOption === "saved"}
+                                    onChange={() => setAddressOption("saved")}
+                                    className="mt-1"
                                 />
-                            </div>
-                            <div>
-                                <label>SĐT người nhận</label>
-                                <input
-                                    type="text"
-                                    name="recipientPhone"
-                                    value={formData.recipientPhone}
-                                    onChange={handleChange}
-                                    className="border w-full p-2 rounded outline-none mt-2"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label>Tỉnh / Thành phố</label>
-                                <select name="city" value={formData.city} onChange={handleChange} className="border w-full p-2 rounded outline-none mt-2" required>
-                                    <option value="">Chọn tỉnh/thành</option>
-                                    <option value="Hồ Chí Minh">Hồ Chí Minh</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label>Quận / Huyện</label>
-                                <select
-                                    name="district"
-                                    value={formData.district}
-                                    onChange={handleChange}
-                                    className="border w-full p-2 rounded outline-none mt-2"
-                                    required
-                                    disabled={districtOptions.length === 0}
-                                >
-                                    <option value="">Chọn quận/huyện</option>
-                                    {districtOptions.map((district) => (
-                                        <option key={district} value={district}>{district}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label>Phường / Xã</label>
-                                <select
-                                    name="ward"
-                                    value={formData.ward}
-                                    onChange={handleChange}
-                                    className="border w-full p-2 rounded outline-none mt-2"
-                                    required
-                                    disabled={wardOptions.length === 0}
-                                >
-                                    <option value="">Chọn phường/xã</option>
-                                    {wardOptions.map((ward) => (
-                                        <option key={ward} value={ward}>{ward}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label>Số nhà, tên đường</label>
-                                <input
-                                    type="text"
-                                    name="address"
-                                    value={formData.address}
-                                    onChange={handleChange}
-                                    className="border w-full p-2 rounded outline-none mt-2"
-                                    required
-                                />
-                            </div>
-                        </div>
+                                <div>
+                                    <p className="font-medium">{user.fullName} - {user.phone}</p>
+                                    <p className="text-sm text-gray-600">{user.address}</p>
+                                </div>
+                            </label>
+                        )}
 
-                        <div>
-                            <label>Ghi chú khác (nếu có)</label>
-                            <textarea name="note" value={formData.note} onChange={handleChange} className="border w-full p-2 rounded outline-none mt-2" rows="3" />
-                        </div>
-                    </form>
+                        <label className="flex items-start space-x-2 cursor-pointer">
+                            <input
+                                type="radio"
+                                name="addressOption"
+                                value="new"
+                                checked={addressOption === "new"}
+                                onChange={() => setAddressOption("new")}
+                                className="mt-1"
+                            />
+                            <span className="font-medium">Nhập địa chỉ mới</span>
+                        </label>
+
+                        {addressOption === "new" && (
+                            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label>Tên người nhận</label>
+                                        <input
+                                            type="text"
+                                            name="recipientName"
+                                            value={formData.recipientName}
+                                            onChange={handleChange}
+                                            className="border w-full p-2 rounded outline-none mt-2"
+                                            required={addressOption === "new"}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label>SĐT người nhận</label>
+                                        <input
+                                            type="text"
+                                            name="recipientPhone"
+                                            value={formData.recipientPhone}
+                                            onChange={handleChange}
+                                            className="border w-full p-2 rounded outline-none mt-2"
+                                            required={addressOption === "new"}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label>Tỉnh / Thành phố</label>
+                                        <Select
+                                            options={provinceOptions.map(p => ({
+                                                value: p.code, // lưu ID
+                                                label: p.name  // hiển thị tên
+                                            }))}
+                                            value={provinceOptions
+                                                .map(p => ({ value: p.code, label: p.name }))
+                                                .find(opt => opt.value === Number(formData.city)) || null
+                                            }
+                                            className='mt-2'
+                                            onChange={(selectedOption) =>
+                                                setFormData(prev => ({ ...prev, city: selectedOption.value }))
+                                            }
+                                            placeholder="Chọn tỉnh/thành"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label>Quận / Huyện</label>
+                                        <Select
+                                            options={districtOptions.map(d => ({
+                                                value: d.code,
+                                                label: d.name
+                                            }))}
+                                            value={districtOptions
+                                                .map(d => ({ value: d.code, label: d.name }))
+                                                .find(opt => opt.value === Number(formData.district)) || null
+                                            }
+                                            onChange={(selectedOption) =>
+                                                setFormData(prev => ({ ...prev, district: selectedOption.value }))
+                                            }
+                                            className='mt-2'
+                                            placeholder="Chọn quận/huyện"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label>Phường / Xã</label>
+                                        <Select
+                                            options={wardOptions.map(w => ({
+                                                value: w.code,
+                                                label: w.name
+                                            }))}
+                                            value={wardOptions
+                                                .map(w => ({ value: w.code, label: w.name }))
+                                                .find(opt => opt.value === Number(formData.ward)) || null
+                                            }
+                                            onChange={(selectedOption) =>
+                                                setFormData(prev => ({ ...prev, ward: selectedOption.value }))
+                                            }
+                                            className='mt-2'
+                                            placeholder="Chọn phường/xã"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label>Số nhà, tên đường</label>
+                                        <input type="text" name="address" value={formData.address} onChange={handleChange} className="border w-full p-2 rounded outline-none mt-2" required />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label>Ghi chú khác (nếu có)</label>
+                                    <textarea
+                                        name="note"
+                                        value={formData.note}
+                                        onChange={handleChange}
+                                        className="border w-full p-2 rounded outline-none mt-2"
+                                        rows="3"
+                                    />
+                                </div>
+                            </form>
+                        )}
+                    </div>
 
                     <div className="bg-white rounded-lg shadow p-4 sticky bottom-0">
                         <div className="flex justify-between font-semibold text-lg">

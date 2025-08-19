@@ -104,6 +104,29 @@ export const createProduct = async (payload) => {
         throw err;
     }
 };
+export const updateProductById = async (id, payload) => {
+    try {
+        const token = localStorage.getItem('MANAGER_token');
+        const response = await fetch(`${API_URL}/update/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            throw new Error(await response.text());
+        }
+
+        const json = await response.json();
+        return json.data;
+    } catch (err) {
+        console.error('Lỗi update sản phẩm', err);
+        throw err;
+    }
+};
 //public
 export const fetchProductsPublicWithPaging = async ({
     keyword,
@@ -227,6 +250,43 @@ export const changeProductStatus = async (id, status) => {
         return await response.json();
     } catch (error) {
         console.error('Lỗi khi thay đổi trạng thái:', error);
+        throw error;
+    }
+};
+
+export const fetchBestSellingProducts = async (limit) => {
+    try {
+        const res = await fetch(`/api/v1/products/best-selling?limit=${limit}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            },
+        });
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return await res.json();
+    } catch (error) {
+        console.error('Lỗi fetch best selling products:', error);
+        throw error;
+    }
+};
+
+
+export const fetchNewestProducts = async (limit) => {
+    try {
+        const res = await fetch(`/api/v1/products/newest?limit=${limit}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            },
+        });
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return await res.json();
+    } catch (error) {
+        console.error('Lỗi fetch newest products:', error);
         throw error;
     }
 };

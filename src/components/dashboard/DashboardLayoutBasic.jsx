@@ -35,6 +35,7 @@ export default function ClippedDrawer({ children }) {
     { text: 'Thương hiệu', icon: <BrandingWatermarkIcon />, path: '/brands-manager' },
     { text: 'Đơn hàng', icon: <ShoppingCartIcon />, path: '/order-manager' },
     { text: 'Nhân viên', icon: <PeopleIcon />, path: '/employee-manager' },
+    { text: 'Khách hàng', icon: <PeopleIcon />, path: '/customer-manager' },
     { text: 'Mã giảm giá', icon: <DiscountIcon />, path: '/discount-manager' },
     { text: 'Thống kê', icon: <BarChartIcon />, path: '/analytics' },
   ];

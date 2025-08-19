@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import {
@@ -10,13 +10,14 @@ import {
 import { addOrder } from "../../api/order";
 import { toast } from "react-toastify";
 
-const stripePromise = loadStripe("pk_test_");
+const stripePromise = loadStripe("pk_test_xxxxx");
 
 const CheckoutForm = ({ orderInfo }) => {
     const navigate = useNavigate();
     const stripe = useStripe();
     const elements = useElements();
-
+    const [cardInfo, setCardInfo] = useState(null);
+    const [loading, setLoading] = useState(false);
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -24,12 +25,12 @@ const CheckoutForm = ({ orderInfo }) => {
             toast.info("Stripe chưa sẵn sàng");
             return;
         }
-
+        setLoading(true);
         try {
             const res = await fetch("https://api.stripe.com/v1/payment_intents", {
                 method: "POST",
                 headers: {
-                    Authorization: `Bearer sk_test_`,
+                    Authorization: `Bearer sk_test_xxxxx`,
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
                 body: new URLSearchParams({
@@ -44,6 +45,7 @@ const CheckoutForm = ({ orderInfo }) => {
 
             if (!data.client_secret) {
                 toast.info("Không tạo được PaymentIntent");
+                setLoading(true);
                 return;
             }
 
@@ -68,7 +70,6 @@ const CheckoutForm = ({ orderInfo }) => {
 
             if (paymentIntent.status === "succeeded") {
                 console.log("Thanh toán thành công:", paymentIntent);
-
                 const payload = {
                     items: orderInfo.products.map((item) => ({
                         productVariantId: item.productVariantId,
@@ -102,6 +103,8 @@ const CheckoutForm = ({ orderInfo }) => {
         } catch (err) {
             console.error("Lỗi handleSubmit:", err);
             console.error("Có lỗi xảy ra khi thanh toán");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -116,9 +119,42 @@ const CheckoutForm = ({ orderInfo }) => {
                         disabled={!stripe}
                         className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded"
                     >
-                        Thanh toán {orderInfo.finalAmount} VNĐ
+                        {loading ? (
+                            <span className="flex items-center gap-2">
+                                <svg
+                                    className="animate-spin h-5 w-5 text-white"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                    ></circle>
+                                    <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                    ></path>
+                                </svg>
+                                Đang xử lý...
+                            </span>
+                        ) : (
+                            <>Thanh toán {orderInfo.finalAmount} VNĐ</>
+                        )}
                     </button>
                 </form>
+                {cardInfo && (
+                    <div className="mt-4 p-3 border rounded bg-gray-100">
+                        <p><strong>Loại thẻ:</strong> {cardInfo.brand.toUpperCase()}</p>
+                        <p><strong>4 số cuối:</strong> {cardInfo.last4}</p>
+                        <p><strong>Hết hạn:</strong> {cardInfo.exp_month}/{cardInfo.exp_year}</p>
+                    </div>
+                )}
             </div>
         </div>
     );

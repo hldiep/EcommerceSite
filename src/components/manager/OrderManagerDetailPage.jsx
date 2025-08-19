@@ -87,7 +87,7 @@ const OrderManagerDetailPage = () => {
                                     <option value="CONFIRMED">Đã xác nhận</option>
                                     <option value="PROCESSING">Đang xử lý</option>
                                     <option value="SHIPPED">Đã giao cho đơn vị vận chuyển</option>
-                                    <option value="DELIVERED">Đã giao hàng</option>
+                                    <option value="COMPLETED">Đã giao hàng</option>
                                     <option value="CANCELLED">Đã hủy</option>
                                     <option value="RETURNED">Đã trả hàng</option>
                                     <option value="REFUNDED">Đã hoàn tiền</option>

@@ -1,5 +1,5 @@
-const API_URL = `/api/v1/m/employees`;
-export const fetchEmployeeWithPaging = async ({
+const API_URL = `/api/v1/m/customers`;
+export const fetchCustomersWithPaging = async ({
     page = 0,
     size = 10,
     keyword = '',
@@ -33,11 +33,11 @@ export const fetchEmployeeWithPaging = async ({
         const json = await response.json();
         return json.data;
     } catch (error) {
-        console.error("Lỗi khi fetch nhân viên:", error);
+        console.error("Lỗi khi fetch khách hàng:", error);
         throw error;
     }
 };
-export const updateEmployeeById = async (id, payload) => {
+export const updateCustomerById = async (id, payload) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
         const response = await fetch(`${API_URL}/update/${id}`, {
@@ -56,38 +56,12 @@ export const updateEmployeeById = async (id, payload) => {
         const json = await response.json();
         return json.data;
     } catch (err) {
-        console.error('Lỗi update nhân viên:', err);
-        throw err;
-    }
-};
-export const createEmployee = async (payload) => {
-    try {
-        const token = localStorage.getItem('MANAGER_token');
-
-        const response = await fetch(`${API_URL}/add`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'Accept': '*/*',
-            },
-            body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText || 'Tạo nhân viên thất bại');
-        }
-
-        const json = await response.json();
-        return json.data;
-    } catch (err) {
-        console.error('Lỗi tạo nhân viên:', err);
+        console.error('Lỗi update khách hàng:', err);
         throw err;
     }
 };
 
-export const changeEmployeeStatus = async (id, status) => {
+export const changeCustomersStatus = async (id, status) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
         const response = await fetch(`${API_URL}/change-status/${id}?status=${status}`, {
@@ -109,7 +83,7 @@ export const changeEmployeeStatus = async (id, status) => {
         throw error;
     }
 };
-export const fetchEmployeeById = async (id) => {
+export const fetchCustomerById = async (id) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
         const response = await fetch(`${API_URL}/${id}`, {

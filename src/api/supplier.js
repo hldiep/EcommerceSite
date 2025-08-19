@@ -7,7 +7,7 @@ export const fetchSupplierWithPaging = async ({ page = 0, size = 10, search = ''
             throw new Error('Token không tồn tại. Vui lòng đăng nhập lại.');
         }
 
-        const url = new URL(`/page`, window.location.origin);
+        const url = new URL(`${API_URL}/page`, window.location.origin);
         url.searchParams.append('page', page);
         url.searchParams.append('size', size);
         url.searchParams.append('sortBy', 'id');

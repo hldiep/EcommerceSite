@@ -284,19 +284,10 @@ const ProductManager = () => {
                                         <td className="px-4 py-2">
                                             <div className="flex gap-2 items-center">
                                                 <button
-                                                    className="px-2 py-1 text-xs bg-green-500 hover:bg-green-600 text-white rounded"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleAddVariant(product.id);
-                                                    }}
-                                                >
-                                                    + Biến thể
-                                                </button>
-                                                <button
                                                     className="px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        handleEditProduct(product);
+                                                        navigate(`/products-manager/edit/${product.id}`);
                                                     }}
                                                 >
                                                     Sửa

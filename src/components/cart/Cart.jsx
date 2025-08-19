@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const Cart = () => {
     const navigate = useNavigate();
+    const [user, setUser] = useState(null);
+    const [role, setRole] = useState(null);
     const [cartItems, setCartItems] = useState(() => {
         const stored = localStorage.getItem('cart');
         return stored ? JSON.parse(stored) : [];
@@ -12,7 +14,17 @@ const Cart = () => {
 
     const [selectedIds, setSelectedIds] = useState([]);
     const [showConfirm, setShowConfirm] = useState(false);
-
+    useEffect(() => {
+        const storedUser = localStorage.getItem('CUSTOMER_user');
+        const storedRole = 'CUSTOMER';
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+            setRole(storedRole);
+        } else {
+            setUser(null);
+            setRole(null);
+        }
+    }, []);
     const handleSelect = (productId) => {
         setSelectedIds((prev) =>
             prev.includes(productId)
@@ -64,7 +76,25 @@ const Cart = () => {
     const total = cartItems
         .filter((item) => selectedIds.includes(item.productId))
         .reduce((sum, item) => sum + item.price * item.quantity, 0);
-
+    const handleBuyNow = (item) => {
+        navigate('/quick-order', {
+            state: {
+                product: {
+                    productId: item.productId,
+                    name: item.name,
+                    imageUrl: item.imageUrl,
+                    price: item.price,
+                    oldPrice: item.oldPrice || null,
+                    quantity: item.quantity,
+                    totalPrice: item.price * item.quantity,
+                    productVariantId: item.productVariantId,
+                    variantName: item.variantName,
+                    brand: item.brand,
+                    brandId: item.brandId || null
+                },
+            },
+        });
+    };
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
             <div className='container mt-28 mb-10'>
@@ -160,18 +190,27 @@ const Cart = () => {
                                 </div>
                                 <button
                                     onClick={() => {
-                                        const selectedItems = cartItems.filter(item => selectedIds.includes(item.productId));
-                                        const cartProducts = selectedItems.map(item => ({
-                                            productVariantId: item.productVariantId,
-                                            imageUrl: item.imageUrl,
-                                            name: item.name,
-                                            variantName: item.variantName,
-                                            price: item.price,
-                                            oldPrice: item.oldPrice,
-                                            quantity: item.quantity
-                                        }));
+                                        if (user && role === 'CUSTOMER') {
+                                            const selectedItems = cartItems.filter(item => selectedIds.includes(item.productId));
+                                            const cartProducts = selectedItems.map(item => ({
+                                                productVariantId: item.productVariantId,
+                                                imageUrl: item.imageUrl,
+                                                name: item.name,
+                                                variantName: item.variantName,
+                                                price: item.price,
+                                                oldPrice: item.oldPrice,
+                                                quantity: item.quantity
+                                            }));
 
-                                        navigate("/payment-info", { state: { cartProducts } });
+                                            navigate("/payment-info", { state: { cartProducts } });
+                                        } else {
+                                            const selectedItem = cartItems.find(item => selectedIds.includes(item.productId));
+                                            if (selectedItem) {
+                                                handleBuyNow(selectedItem);
+                                            } else {
+                                                toast.warning("Vui lòng chọn sản phẩm trước khi mua ngay");
+                                            }
+                                        }
                                     }}
                                     disabled={selectedIds.length === 0}
                                     className={`px-6 py-2 rounded font-semibold text-white ${selectedIds.length === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
@@ -206,7 +245,7 @@ const Cart = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };
 

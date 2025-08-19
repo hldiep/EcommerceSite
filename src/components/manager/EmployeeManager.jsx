@@ -34,14 +34,14 @@ const EmployeeManager = () => {
 
     useEffect(() => {
         loadEmployee();
-    }, [page, sortBy, direction]);
+    }, [page, sortBy, direction, keyword]);
     const loadEmployee = async () => {
         setLoading(true);
         try {
             const data = await fetchEmployeeWithPaging({
                 page,
                 size: 10,
-                search: keyword,
+                keyword,
                 sortBy,
                 direction,
             });
@@ -186,7 +186,7 @@ const EmployeeManager = () => {
                             className="border px-4 py-2 rounded w-48 outline-none"
                         >
                             <option value="id">Sắp xếp theo ID</option>
-                            <option value="name">Sắp xếp theo tên</option>
+                            <option value="fullName">Sắp xếp theo tên</option>
                         </select>
 
                         <select
@@ -237,7 +237,6 @@ const EmployeeManager = () => {
                                 <th className="p-3">Địa chỉ</th>
                                 <th className="p-3">Vai trò</th>
                                 <th className="p-3">Trạng thái</th>
-                                <th className="p-3">Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -270,20 +269,7 @@ const EmployeeManager = () => {
                                         <td className="p-3">{item.address}</td>
                                         <td className="p-3">{item.role.name}</td>
                                         <td className="p-3">{item.status}</td>
-                                        <td className="p-3 flex gap-2">
-                                            <button
-                                                onClick={() => handleEditClick(item)}
-                                                className="px-3 py-1 bg-blue-500 text-white rounded"
-                                            >
-                                                Sửa
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteClick(item.id)}
-                                                className="px-3 py-1 bg-red-500 text-white rounded"
-                                            >
-                                                Xóa
-                                            </button>
-                                        </td>
+
                                     </tr>
                                 ))
                             )}
@@ -439,7 +425,7 @@ const EmployeeManager = () => {
                                                 placeholder={"Nhập mật khẩu"}
                                             />
                                         </div>
-                                        <div className="col-span-2">
+                                        {/* <div className="col-span-2">
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
                                             <select
                                                 className="border px-3 py-2 rounded w-full outline-none"
@@ -450,7 +436,7 @@ const EmployeeManager = () => {
                                                 <option value="INACTIVE">INACTIVE</option>
                                                 <option value="DELETED">DELETED</option>
                                             </select>
-                                        </div>
+                                        </div> */}
                                     </div>
 
 
