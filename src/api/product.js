@@ -234,7 +234,7 @@ export const fetchProductPublicById = async (id) => {
 export const changeProductStatus = async (id, status) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
-        const response = await fetch(`/change-status/${id}?status=${status}`, {
+        const response = await fetch(`/api/v1/m/products/change-status/${id}?status=${status}`, {
             method: 'PATCH',
             headers: {
                 'Accept': '*/*',
@@ -242,12 +242,16 @@ export const changeProductStatus = async (id, status) => {
             },
         });
 
+        console.log("Response status:", response.status);
+
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(errorText || 'Không thể thay đổi trạng thái sản phẩm');
+            throw new Error(errorText || 'Không thể thay đổi trạng thái');
         }
 
-        return await response.json();
+        const data = await response.json();
+        console.log("Response data:", data);
+        return data;
     } catch (error) {
         console.error('Lỗi khi thay đổi trạng thái:', error);
         throw error;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import {
@@ -10,14 +10,36 @@ import {
 import { addOrder } from "../../api/order";
 import { toast } from "react-toastify";
 
-const stripePromise = loadStripe("pk_test_xxxxx");
+const stripePromise = loadStripe("pk_test_xxxx");
 
 const CheckoutForm = ({ orderInfo }) => {
     const navigate = useNavigate();
     const stripe = useStripe();
     const elements = useElements();
+    const [orderInfo2, setOrderInfo2] = useState(null);
+    const [finalAmount, setFinalAmount] = useState(0);
     const [cardInfo, setCardInfo] = useState(null);
     const [loading, setLoading] = useState(false);
+    useEffect(() => {
+        const storedData = localStorage.getItem("quickOrderData");
+        if (storedData) {
+            try {
+                const parsed = JSON.parse(storedData);
+                if (parsed?.orderData && parsed?.products) {
+                    setOrderInfo2(parsed.orderData);
+                    setFinalAmount(parsed.finalAmount || 0);
+                } else {
+                    navigate("/cart");
+                }
+            } catch (error) {
+                console.error("Lỗi parse quickOrderData:", error);
+                navigate("/cart");
+            }
+        } else {
+            navigate("/cart");
+        }
+    }, [navigate]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -144,7 +166,7 @@ const CheckoutForm = ({ orderInfo }) => {
                                 Đang xử lý...
                             </span>
                         ) : (
-                            <>Thanh toán {orderInfo.finalAmount} VNĐ</>
+                            <>Thanh toán {orderInfo.finalAmount || orderInfo2.finalAmount} VNĐ</>
                         )}
                     </button>
                 </form>

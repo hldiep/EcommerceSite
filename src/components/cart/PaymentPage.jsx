@@ -105,7 +105,7 @@ const PaymentPage = () => {
                     </div>
 
                     <div className="rounded-lg bg-gray-50 p-4 mb-6">
-                        <div className="mb-4">
+                        {/* <div className="mb-4">
                             <label className="text-gray-600 text-sm block mb-1">
                                 Nhập mã giảm giá (chỉ áp dụng 1 lần)
                             </label>
@@ -125,7 +125,7 @@ const PaymentPage = () => {
                                     Áp dụng
                                 </button>
                             </div>
-                        </div>
+                        </div> */}
 
                         <div className="text-sm text-gray-700 space-y-2">
                             <div className="flex justify-between">

@@ -42,6 +42,7 @@ import ThanhToan from './components/product/ThanhToan'
 import VerifyOtp2 from './components/product/VerifyOtp2'
 import ConfirmOrder from './components/product/ConfirmOrder'
 import ProductManagerEdit from './components/manager/ProductEdit'
+import ProductManagerEditVariant from './components/manager/ProductManagerEditVariant'
 function App() {
 
   return (
@@ -87,6 +88,7 @@ function App() {
         <Route path="products-manager/edit/:id" element={<ProductManagerEdit />} />
         <Route path="products-manager/add" element={<ProductManagerAdd />} />
         <Route path="products-manager/add/variant/:id" element={<ProductManagerAddVariant />} />
+        <Route path="products-manager/edit/variant/:id" element={<ProductManagerEditVariant />} />
         <Route path="discount-manager" element={<DiscountManager />} />
         <Route path="order-manager" element={<OrderManager />} />
         <Route path="order-manager/:id" element={<OrderManagerDetailPage />} />

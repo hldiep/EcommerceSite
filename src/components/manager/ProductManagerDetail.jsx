@@ -76,6 +76,7 @@ const ProductManagerDetail = () => {
                         </div>
                         <div className='flex justify-between'>
                             <h2 className="text-xl font-semibold">Biến thể</h2>
+
                             <button
                                 onClick={() => navigate(`/products-manager/add/variant/${product.id}`)}
                                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded h-fit"
@@ -89,8 +90,10 @@ const ProductManagerDetail = () => {
                                     <tr>
                                         <th className="px-2 py-1 text-left">Tên</th>
                                         <th className="px-2 py-1 text-left">Giá</th>
+                                        <th className="px-2 py-1 text-left">Số lượng</th>
                                         <th className="px-2 py-1 text-left">Giảm giá</th>
                                         <th className="px-2 py-1 text-left">Ảnh</th>
+                                        <th className="px-2 py-1 text-left">Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -100,6 +103,7 @@ const ProductManagerDetail = () => {
                                             <td className="px-2 py-1 text-red-600">
                                                 {variant.price?.toLocaleString()}₫
                                             </td>
+                                            <td className="px-2 py-1">{variant.quantity}</td>
                                             <td className="px-2 py-1 text-red-500">
                                                 {variant.priceSale?.toLocaleString()}₫
                                             </td>
@@ -119,6 +123,12 @@ const ProductManagerDetail = () => {
                                                     '-'
                                                 )}
                                             </td>
+                                            <button
+                                                onClick={() => navigate(`/products-manager/edit/variant/${variant.id}`)}
+                                                className="items-center text-center mt-2 mb-2 px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded"
+                                            >
+                                                Sửa
+                                            </button>
                                         </tr>
                                     ))}
                                 </tbody>

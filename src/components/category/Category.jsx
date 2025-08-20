@@ -80,11 +80,33 @@ const Category = () => {
     }, [categoryId]);
     if (!categoryId) return <p>Không tìm thấy danh mục.</p>;
     const options = [
-        { key: "popular", label: "Phổ biến", icon: <FaStar className="text-blue-600" /> },
-        { key: "promo", label: "Khuyến mãi HOT", icon: <MdLocalOffer className="text-black" /> },
+        { key: "relevant", label: "Liên quan", icon: <FaStar className="text-blue-600" /> },
         { key: "price-asc", label: "Giá Thấp - Cao", icon: <BiSortUp className="text-black" /> },
         { key: "price-desc", label: "Giá Cao - Thấp", icon: <BiSortDown className="text-black" /> },
     ];
+    const handleSort = (sortKey) => {
+        setSelected(sortKey);
+
+        if (sortKey === "price-asc") {
+            const sorted = [...products].sort((a, b) => {
+                const priceA = a.productVariants?.[0]?.priceSale || a.productVariants?.[0]?.price || 0;
+                const priceB = b.productVariants?.[0]?.priceSale || b.productVariants?.[0]?.price || 0;
+                return priceA - priceB;
+            });
+            setProducts(sorted);
+        } else if (sortKey === "price-desc") {
+            const sorted = [...products].sort((a, b) => {
+                const priceA = a.productVariants?.[0]?.priceSale || a.productVariants?.[0]?.price || 0;
+                const priceB = b.productVariants?.[0]?.priceSale || b.productVariants?.[0]?.price || 0;
+                return priceB - priceA;
+            });
+            setProducts(sorted);
+        } else if (sortKey === "relevant") {
+            setPage(0);
+            setHasMore(true);
+            fetchData(0, false);
+        }
+    };
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
             <div className='container mt-28 mb-10'>
@@ -128,12 +150,12 @@ const Category = () => {
                         {options.map((option) => (
                             <button
                                 key={option.key}
-                                onClick={() => setSelected(option.key)}
+                                onClick={() => handleSort(option.key)}
                                 className={`flex items-center gap-1 px-4 py-2 rounded-full border text-sm font-medium transition
-              ${selected === option.key
+          ${selected === option.key
                                         ? "border-blue-500 text-blue-600 bg-blue-50"
-                                        : "border-gray-200 text-black bg-gray-100 hover:bg-gray-200"}
-            `}
+                                        : "border-gray-200 text-black bg-gray-100 hover:bg-gray-200"
+                                    }`}
                             >
                                 {option.icon}
                                 {option.label}

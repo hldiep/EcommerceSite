@@ -3,7 +3,8 @@ import ClippedDrawer from '../dashboard/DashboardLayoutBasic';
 import { useNavigate } from 'react-router-dom';
 import { fetchCategoriesWithPaging } from '../../api/categories';
 import { fetchBrandsWithPaging } from '../../api/brand';
-import { fetchProductsWithPaging } from '../../api/product';
+import { changeProductStatus, fetchProductsWithPaging } from '../../api/product';
+import { toast } from 'react-toastify';
 
 const ProductManager = () => {
     const navigate = useNavigate();
@@ -102,6 +103,20 @@ const ProductManager = () => {
                 ? prev.filter((id) => id !== productId)
                 : [...prev, productId]
         );
+    };
+    const handleDeleteProduct = async (id) => {
+        if (!window.confirm("Bạn có chắc muốn xoá sản phẩm này không?")) return;
+
+        const status = 'DELETED';
+        console.log("Gửi yêu cầu đổi trạng thái sản phẩm:", { id, status }); // log ra id và status
+
+        try {
+            await changeProductStatus(id, status);
+            toast.success("Đã xoá sản phẩm thành công");
+        } catch (error) {
+            console.error("Lỗi khi thay đổi trạng thái:", error);
+            toast.error("Xoá sản phẩm thất bại");
+        }
     };
     return (
         <ClippedDrawer>

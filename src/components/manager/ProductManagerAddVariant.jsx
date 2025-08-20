@@ -85,7 +85,7 @@ const ProductManagerAddVariant = () => {
         warranty: '',
         barcode: '',
         release_at: '',
-        imageUrl: [],
+        imageUrl: '',
         specifications: [{ key: '', value: '' }],
         description: '',
         supplierId: '',
@@ -111,7 +111,7 @@ const ProductManagerAddVariant = () => {
         });
 
         const payload = {
-            productId: id,
+            productId: Number(id), // ép kiểu ID sản phẩm
             name: form.name,
             seoName: form.seoName,
             price: Number(form.price),
@@ -120,23 +120,26 @@ const ProductManagerAddVariant = () => {
             sku: form.sku,
             model: form.model,
             inventoryPolicy: form.inventoryPolicy,
-            warranty: form.warranty,
+            warranty: Number(form.warranty), // ép kiểu number
             barcode: form.barcode,
             release_at: form.release_at
                 ? new Date(form.release_at).toISOString()
                 : null,
-            imageUrl: form.imageUrl || [],
+            imageUrl: form.imageUrl.length > 0 ? form.imageUrl[0] : "", // lấy 1 link ảnh
             specifications: specsObject,
             description: form.description,
-            supplierId: form.supplierId,
+            supplierId: Number(form.supplierId),
             status: form.status,
-            optionValueIds: form.optionIds || [],
+            optionValueIds: form.optionIds || [], // đúng key
         };
+
         console.log('Dữ liệu tải lên', payload);
+
         try {
             setLoading(true);
             await createProductVariant(payload);
             toast.success("Tạo sản phẩm thành công!");
+            // reset form
             setForm({
                 productId: '',
                 name: '',
@@ -155,7 +158,7 @@ const ProductManagerAddVariant = () => {
                 description: '',
                 supplierId: '',
                 status: 'ACTIVE',
-                optionValueIds: '',
+                optionValueIds: [],
             });
         } catch (err) {
             toast.error("Tạo sản phẩm thất bại!");
@@ -163,6 +166,7 @@ const ProductManagerAddVariant = () => {
             setLoading(false);
         }
     };
+
     const setSpecifications = (specs) => {
         setForm(prev => ({ ...prev, specifications: specs }));
     };
@@ -241,7 +245,6 @@ const ProductManagerAddVariant = () => {
                             placeholder="Chọn nhà cung cấp..."
                         />
                     </div>
-                    {/* Nhóm 3: Hình ảnh & Trạng thái */}
                     <div className="bg-white p-4 rounded shadow">
                         <h3 className="font-semibold text-lg mb-4">Hình ảnh & Trạng thái</h3>
                         <div className="grid grid-cols-2 gap-4 items-center">

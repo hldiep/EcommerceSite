@@ -40,7 +40,7 @@ export const fetchProductVariantsWithPaging = async ({ page = 0, size = 10, sear
 export const updateProductVariantById = async (id, payload) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
-        const response = await fetch(`/update/${id}`, {
+        const response = await fetch(`${API_URL}/update/${id}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -64,7 +64,7 @@ export const createProductVariant = async (payload) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
 
-        const response = await fetch('/add', {
+        const response = await fetch(`${API_URL}/add`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,

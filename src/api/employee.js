@@ -98,12 +98,16 @@ export const changeEmployeeStatus = async (id, status) => {
             },
         });
 
+        console.log("Response status:", response.status);
+
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(errorText || 'Không thể thay đổi trạng thái');
         }
 
-        return await response.json();
+        const data = await response.json();
+        console.log("Response data:", data);
+        return data;
     } catch (error) {
         console.error('Lỗi khi thay đổi trạng thái:', error);
         throw error;

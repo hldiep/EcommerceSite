@@ -32,17 +32,6 @@ const ConfirmOrder = () => {
         }
     }, [navigate]);
 
-    // const handleConfirmOrder = async () => {
-    //     try {
-    //         console.log("Dữ liệu gửi lên placeOrder:", orderInfo);
-    //         const data = await placeOrder(orderInfo);
-    //         toast.success("Đặt hàng thành công!");
-    //         navigate(`/payment-success`);
-    //     } catch (error) {
-    //         console.error("Lỗi đặt hàng:", error);
-    //         toast.error(error.message || "Đặt hàng thất bại");
-    //     }
-    // };
     const handleConfirmOrder = async () => {
 
         if (!orderInfo || !products.length) {

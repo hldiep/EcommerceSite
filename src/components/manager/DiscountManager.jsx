@@ -79,6 +79,7 @@ const DiscountManager = () => {
             const formatDateTime = (value) => {
                 return value ? new Date(value).toISOString() : null;
             };
+
             const payload = {
                 ...editForm,
                 value: Number(editForm.value),
@@ -87,7 +88,7 @@ const DiscountManager = () => {
                 startAt: formatDateTime(editForm.startAt),
                 endAt: formatDateTime(editForm.endAt),
             };
-
+            console.log('Payload', payload);
             if (editingDiscount?.id) {
                 await updateDiscountById(editingDiscount.id, payload);
                 toast.success('Cập nhật thành công!');

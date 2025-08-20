@@ -50,6 +50,28 @@ const SearchResults = () => {
         await fetchData(nextPage, true);
         setLoadingMore(false);
     };
+    const handleSort = (sortType) => {
+        let sortedResults = [...results];
+
+        if (sortType === 'asc') {
+            sortedResults.sort((a, b) => {
+                const priceA = a.productVariants?.[0]?.priceSale || a.productVariants?.[0]?.price || 0;
+                const priceB = b.productVariants?.[0]?.priceSale || b.productVariants?.[0]?.price || 0;
+                return priceA - priceB;
+            });
+        } else if (sortType === 'desc') {
+            sortedResults.sort((a, b) => {
+                const priceA = a.productVariants?.[0]?.priceSale || a.productVariants?.[0]?.price || 0;
+                const priceB = b.productVariants?.[0]?.priceSale || b.productVariants?.[0]?.price || 0;
+                return priceB - priceA;
+            });
+        } else if (sortType === 'relevant') {
+            fetchData(0);
+            return;
+        }
+
+        setResults(sortedResults);
+    };
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
             <div className='container mt-28 mb-10'>
@@ -63,9 +85,24 @@ const SearchResults = () => {
                 <div className="mt-4 mb-10">
                     <p className='text-xl font-semibold'>Sắp xếp theo:</p>
                     <div className='flex space-x-4 text-sm mt-5'>
-                        <button className="border border-red-500 text-red-500 rounded-lg px-2 py-1">Liên quan</button>
-                        <button className="border border-red-500 rounded-lg px-2 py-1 flex items-center space-x-1"><BiSortUp /><p>Giá cao</p></button>
-                        <button className="border border-red-500 rounded-lg px-2 py-1 flex items-center space-x-1"><BiSortDown /><p>Giá thấp</p></button>
+                        <button
+                            className="border border-red-500 text-red-500 rounded-lg px-2 py-1"
+                            onClick={() => handleSort('relevant')}
+                        >
+                            Liên quan
+                        </button>
+                        <button
+                            className="border border-red-500 rounded-lg px-2 py-1 flex items-center space-x-1"
+                            onClick={() => handleSort('desc')}
+                        >
+                            <BiSortUp /><p>Giá cao</p>
+                        </button>
+                        <button
+                            className="border border-red-500 rounded-lg px-2 py-1 flex items-center space-x-1"
+                            onClick={() => handleSort('asc')}
+                        >
+                            <BiSortDown /><p>Giá thấp</p>
+                        </button>
                     </div>
                 </div>
                 {loading ? (

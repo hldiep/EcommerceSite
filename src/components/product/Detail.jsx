@@ -8,6 +8,7 @@ import SpecificationTable from '../helper/SpecificationTable';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Thumbs } from 'swiper/modules';
 import CompareBar from './CompareBar';
+import { fetchChatAICompare } from '../../api/chat-ai';
 
 const Detail = () => {
     const navigate = useNavigate();
@@ -127,11 +128,19 @@ const Detail = () => {
         setCompareItems([]);
         setShowCompareBar(false);
     };
-
-    const handleCompare = () => {
-        // navigate đến trang so sánh
-        navigate("/compare", { state: { items: compareItems } });
+    const handleAdd = (product) => {
+        setCompareItems((prev) => [...prev, product]);
     };
+    const handleCompare = async () => {
+        if (!compareItems.length) return;
+
+        // Chuyển sang trang ProductCompare và truyền compareItems qua state
+        navigate('/compare', { state: { products: compareItems } });
+    };
+    const handleClose = async () => {
+        setShowCompareBar(false)
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
             <div className='container mt-28 mb-10'>
@@ -361,9 +370,11 @@ const Detail = () => {
                 {showCompareBar && (
                     <CompareBar
                         compareItems={compareItems}
-                        onRemove={handleRemove}
-                        onClearAll={handleClearAll}
+                        onRemove={(id) => setCompareItems(prev => prev.filter(p => p.id !== id))}
+                        onClearAll={() => setCompareItems([])}
                         onCompare={handleCompare}
+                        onAdd={handleAdd}
+                        onClose={handleClose}
                     />
                 )}
             </div>
