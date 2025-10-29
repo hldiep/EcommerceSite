@@ -7,9 +7,9 @@ import Categories from './Categories';
 
 const HomeSection = () => {
     const promotions = [
-        { id: 1, image: "https://cdn2.cellphones.com.vn/insecure/rs:fill:690:300/q:90/plain/https://dashboard.cellphones.com.vn/storage/dien-thoai-oppo-reno14-home.png" },
-        { id: 2, image: "https://cdn2.cellphones.com.vn/insecure/rs:fill:690:300/q:90/plain/https://dashboard.cellphones.com.vn/storage/Home%20(2).jpg" },
-        { id: 3, image: "https://cdn2.cellphones.com.vn/insecure/rs:fill:690:300/q:90/plain/https://dashboard.cellphones.com.vn/storage/iphone-16-pro-max-home.png" },
+        { id: 1, image: "https://cdn2.cellphones.com.vn/insecure/rs:fill:1036:450/q:90/plain/https://dashboard.cellphones.com.vn/storage/Z7-Sliding-1025.png" },
+        { id: 2, image: "https://cdn2.cellphones.com.vn/insecure/rs:fill:1036:450/q:90/plain/https://dashboard.cellphones.com.vn/storage/690x300_iPhone_17_Pro_Opensale_v3.png" },
+        { id: 3, image: "https://cdn2.cellphones.com.vn/insecure/rs:fill:1036:450/q:90/plain/https://dashboard.cellphones.com.vn/storage/ideapad_slim_sliding.png" },
     ];
 
     return (

@@ -2,9 +2,9 @@ import React, { useState } from 'react'
 import Header from '../home/Header'
 import { Outlet } from 'react-router-dom'
 import Footer from '../home/Footer'
-import ChatBotBox from '../helper/ChatBotBox'
 import ScrollToTop from '../helper/ScrollToTop'
 import ScrollToTopButton from '../home/ScrollToTopButton'
+import Chatbot from '../helper/Chatbot'
 const CustomerLayout = () => {
 
     const [chatOpen, setChatOpen] = useState(false);
@@ -16,7 +16,7 @@ const CustomerLayout = () => {
                 <Outlet />
             </main>
             <Footer />
-            <ChatBotBox open={chatOpen} setOpen={setChatOpen} />
+            <Chatbot open={chatOpen} setOpen={setChatOpen} />
             <ScrollToTopButton />
         </>
     )

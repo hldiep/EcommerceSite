@@ -10,7 +10,7 @@ import {
 import { addOrder } from "../../api/order";
 import { toast } from "react-toastify";
 
-const stripePromise = loadStripe("pk_test_xxxx");
+const stripePromise = loadStripe("");
 
 const CheckoutForm = ({ orderInfo }) => {
     const navigate = useNavigate();
@@ -52,7 +52,7 @@ const CheckoutForm = ({ orderInfo }) => {
             const res = await fetch("https://api.stripe.com/v1/payment_intents", {
                 method: "POST",
                 headers: {
-                    Authorization: `Bearer sk_test_xxxxx`,
+                    Authorization: ``,
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
                 body: new URLSearchParams({

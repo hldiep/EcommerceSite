@@ -25,6 +25,8 @@ const Detail = () => {
     const [loading, setLoading] = useState(true);
     const specificationRef = useRef(null);
     const swiperRef = useRef(null);
+
+
     useEffect(() => {
         const storedUser = localStorage.getItem('CUSTOMER_user');
         const storedRole = 'CUSTOMER';
@@ -363,6 +365,9 @@ const Detail = () => {
                                         }
                                     />
                                 )}
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-semibold mb-2 mt-4">Đánh giá</h2>
                             </div>
                         </div>
                     </div>

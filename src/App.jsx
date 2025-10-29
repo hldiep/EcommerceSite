@@ -43,6 +43,7 @@ import VerifyOtp2 from './components/product/VerifyOtp2'
 import ConfirmOrder from './components/product/ConfirmOrder'
 import ProductManagerEdit from './components/manager/ProductEdit'
 import ProductManagerEditVariant from './components/manager/ProductManagerEditVariant'
+import Review from './components/product/Review'
 function App() {
 
   return (
@@ -76,6 +77,8 @@ function App() {
           <Route path="payment-continue" element={<PaymentPage />} />
           <Route path="payment-success" element={<PaymentSuccess />} />
           <Route path="credit-card-payment" element={<CreditCardPayment />} />
+
+          <Route path="review" element={<Review />} />
         </Route>
 
         <Route path='/tongquan' element={<Tongquan />} />
