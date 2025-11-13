@@ -5,6 +5,7 @@ import Footer from '../home/Footer'
 import ScrollToTop from '../helper/ScrollToTop'
 import ScrollToTopButton from '../home/ScrollToTopButton'
 import Chatbot from '../helper/Chatbot'
+// import Chatbot from '../search/Chatbot'
 const CustomerLayout = () => {
 
     const [chatOpen, setChatOpen] = useState(false);
@@ -16,6 +17,7 @@ const CustomerLayout = () => {
                 <Outlet />
             </main>
             <Footer />
+            {/* <Chatbot /> */}
             <Chatbot open={chatOpen} setOpen={setChatOpen} />
             <ScrollToTopButton />
         </>
