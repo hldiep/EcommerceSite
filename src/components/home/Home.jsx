@@ -10,10 +10,10 @@ const Home = () => {
         <div className="min-h-screen bg-gray-50 flex justify-center">
             <div className='container mt-20 mb-10'>
                 <HomeSection />
-                <Newest />
                 <BanPhim />
                 <Chuot />
                 <Loa />
+                <Newest />
             </div>
         </div>
     )

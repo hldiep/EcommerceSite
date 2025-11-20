@@ -8,7 +8,8 @@ import SpecificationTable from '../helper/SpecificationTable';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Thumbs } from 'swiper/modules';
 import CompareBar from './CompareBar';
-import { fetchChatAICompare } from '../../api/chat-ai';
+import Review from './Review';
+import RecentlyViewed from './RecentlyViewed ';
 
 const Detail = () => {
     const navigate = useNavigate();
@@ -25,7 +26,6 @@ const Detail = () => {
     const [loading, setLoading] = useState(true);
     const specificationRef = useRef(null);
     const swiperRef = useRef(null);
-
 
     useEffect(() => {
         const storedUser = localStorage.getItem('CUSTOMER_user');
@@ -53,6 +53,22 @@ const Detail = () => {
         };
         loadProduct();
     }, [id]);
+    useEffect(()=>{
+        if(!product) return;
+        let viewed = JSON.parse(localStorage.getItem("recentViewed")) || [];
+
+        viewed = viewed.filter(item => item.id !== product.id);
+        viewed.unshift({
+            id: product.id,
+            name: product.name,
+            imageUrl: product.imageUrl,
+            brand: product.brand,
+            price: product.productVariants?.[0]?.priceSale ?? null
+        });
+
+        viewed = viewed.slice(0, 10);
+        localStorage.setItem("recentViewed", JSON.stringify(viewed));
+    }), [product];
     useEffect(() => {
         if (product?.variants?.length > 0) {
             setSelectedVariant(product.variants[0]);
@@ -354,20 +370,26 @@ const Detail = () => {
                                 </div>
 
                             </div>
-                            <div className="w-2/3 mt-10" ref={specificationRef}>
-                                <h2 className="text-xl font-semibold mb-2">Thông số kỹ thuật</h2>
-                                {product?.specifications && Object.keys(product.specifications).length > 0 && (
-                                    <SpecificationTable
-                                        specifications={
-                                            typeof product.specifications === 'string'
-                                                ? JSON.parse(product.specifications)
-                                                : product.specifications
-                                        }
-                                    />
-                                )}
+                            <div className="flex flex-col md:flex-row gap-6 mt-10">
+                                <div className="w-2/3 mt-10" ref={specificationRef}>
+                                    <h2 className="text-xl font-semibold mb-2">Thông số kỹ thuật</h2>
+                                    {product?.specifications && Object.keys(product.specifications).length > 0 && (
+                                        <SpecificationTable
+                                            specifications={
+                                                typeof product.specifications === 'string'
+                                                    ? JSON.parse(product.specifications)
+                                                    : product.specifications
+                                            }
+                                        />
+                                    )}
+                                </div>
+                                <div className="md:w-1/3 w-full">
+                                    <RecentlyViewed />
+                                </div>
                             </div>
                             <div>
                                 <h2 className="text-xl font-semibold mb-2 mt-4">Đánh giá</h2>
+                                <Review/>
                             </div>
                         </div>
                     </div>

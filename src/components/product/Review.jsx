@@ -54,8 +54,8 @@ const Review = () => {
         reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 
     return (
-        <div className="min-h-screen bg-gray-50 flex justify-center">
-            <div className="container mt-28 mb-10">
+        <div className="min-h-screen bg-gray-50 flex">
+            <div className="container mb-10">
                 <div className="max-w-2xl mx-auto p-4 space-y-6">
 
                     <div className="p-6 rounded-2xl shadow-md border bg-white text-center">
