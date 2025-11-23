@@ -119,12 +119,12 @@ const Category = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <img
-                        src="https://cdn2.cellphones.com.vn/insecure/rs:fill:595:100/q:80/plain/https://dashboard.cellphones.com.vn/storage/dienj-thoai-vivo-b2s.png"
+                        src="https://cdn2.cellphones.com.vn/insecure/rs:fill:595:100/q:100/plain/https://dashboard.cellphones.com.vn/storage/sdgfjghfg.png"
                         alt="banner 1"
                         className="rounded-xl w-full h-auto object-cover"
                     />
                     <img
-                        src="https://cdn2.cellphones.com.vn/insecure/rs:fill:595:100/q:80/plain/https://dashboard.cellphones.com.vn/storage/nothing-phone-3a-cate-0625.png"
+                        src="https://cdn2.cellphones.com.vn/insecure/rs:fill:595:100/q:100/plain/https://dashboard.cellphones.com.vn/storage/sfsdsdfsdfss.png"
                         alt="banner 2"
                         className="rounded-xl w-full h-auto object-cover"
                     />
