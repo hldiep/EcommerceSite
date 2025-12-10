@@ -5,17 +5,23 @@ import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { toast } from 'react-toastify';
 import { createBrand, fetchBrandsWithPaging, updateBrandById } from '../../api/brand';
+import Table from '../ui/Table';
 const BrandManager = () => {
     const navigate = useNavigate();
     const [brands, setBrands] = useState([]);
     const [keyword, setKeyword] = useState('');
+
+    const [currentPage, setCurrentPage] = useState(1);  // Table: 1-based
+    const [pageSize, setPageSize] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
+
     const [page, setPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
 
     const [sortBy, setSortBy] = useState('id');
     const [direction, setDirection] = useState('asc');
     const [editingBrand, setEditingBrand] = useState(null);
+
     const [editForm, setEditForm] = useState({
         name: '',
         description: '',
@@ -25,19 +31,19 @@ const BrandManager = () => {
 
     useEffect(() => {
         loadBrands();
-    }, [page, sortBy, direction]);
+    }, [page, sortBy, direction, pageSize, keyword]);
     const loadBrands = async () => {
         setLoading(true);
         try {
             const data = await fetchBrandsWithPaging({
                 page,
-                size: 10,
+                size: pageSize,
                 search: keyword,
                 sortBy,
                 direction,
             });
             setBrands(data.data);
-            setTotalPages(data.totalPages);
+            setTotalItems(data.totalElements || 0);
         } catch (error) {
             console.error('Lỗi tải danh mục:', error);
         } finally {
@@ -90,13 +96,20 @@ const BrandManager = () => {
     };
     const handleSortByChange = (e) => {
         setSortBy(e.target.value);
-        setPage(0); // về trang đầu
+        setPage(0); 
     };
 
     const handleDirectionChange = (e) => {
         setDirection(e.target.value);
-        setPage(0); // về trang đầu
+        setPage(0); 
     };
+
+    const columns = [
+        {key: "id", label: "Id"},
+        {key: "logoUrl", label: "Logo", render: (row) => <img src={row.logoUrl} className="w-5 h-5 object-contain rounded" />},
+        {key: "name", label: "Tên thương hiệu"},
+        {key: "description", label: "Mô tả"}
+    ]
     return (
         <ClippedDrawer>
             <div className="p-6 max-w-7xl mx-auto space-y-6 bg-gray-50 min-h-[calc(100vh-80px)]">
@@ -170,47 +183,24 @@ const BrandManager = () => {
                         <div className="ml-4 text-blue-600 font-medium text-lg">Đang tải dữ liệu...</div>
                     </div>
                 ) : (
-                    <table className="w-full table-auto bg-white shadow rounded">
-                        <thead className="bg-gray-100">
-                            <tr className="text-left">
-                                <th className="p-3">ID</th>
-                                <th className="p-3">Logo</th>
-                                <th className="p-3">Tên thương hiệu</th>
-                                <th className="p-3">Mô tả</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {brands.length === 0 ? (
-                                <tr>
-                                    <td colSpan="3" className="text-center py-6">
-                                        <div className="flex flex-col items-center justify-center space-y-2">
-                                            <img
-                                                src="https://www.shutterstock.com/image-vector/no-result-document-file-data-600nw-2293706569.jpg"
-                                                alt="Không có dữ liệu"
-                                                className="w-32 h-32 object-contain opacity-60"
-                                            />
-                                            <p className="text-gray-500">Không có dữ liệu</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : (
-                                brands.map((item) => (
-                                    <tr
-                                        key={item.id}
-                                        className="border-t hover:bg-blue-50 cursor-pointer"
-                                        onClick={() => handleEditClick(item)}
-                                    >
-                                        <td className="p-3">{item.id}</td>
-                                        <td className="p-3">
-                                            <img src={item.logoUrl} alt={item.name} className="h-10 w-auto object-contain" />
-                                        </td>
-                                        <td className="p-3">{item.name}</td>
-                                        <td className="p-3">{item.description || '-'}</td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                    <Table
+                    columns={columns}
+                    data={brands}
+                    pageSize={pageSize}
+                    totalItems={totalItems}
+                    currentPage={currentPage}
+                    onPaging={(p) => {
+                        setCurrentPage(p);
+                        setPage(p - 1);
+                    }}
+
+                    onPagingSizeChange={(size) => {
+                        setPageSize(size);
+                        setCurrentPage(1);
+                        setPage(0);   
+                    }}
+                    onRowClick={(row) => handleEditClick(row)}
+                    />
                 )}
                 <Transition.Root show={!!editingBrand} as={Fragment}>
                     <Dialog as="div" className="fixed inset-0 z-[9999]" onClose={() => setEditingBrand(null)}>
@@ -308,23 +298,7 @@ const BrandManager = () => {
                         </div>
                     </Dialog>
                 </Transition.Root>
-                <div className="flex justify-between items-center pt-4">
-                    <button
-                        disabled={page <= 0}
-                        onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                        className={`px-4 py-2 rounded ${page <= 0 ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
-                    >
-                        Trang trước
-                    </button>
-                    <span>Trang {page + 1} / {totalPages}</span>
-                    <button
-                        disabled={page + 1 >= totalPages}
-                        onClick={() => setPage((prev) => prev + 1)}
-                        className={`px-4 py-2 rounded ${page + 1 >= totalPages ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
-                    >
-                        Trang sau
-                    </button>
-                </div>
+                
             </div>
         </ClippedDrawer>
     );

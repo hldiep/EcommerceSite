@@ -20,6 +20,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { FaComment } from 'react-icons/fa';
 
 const drawerWidth = 240;
 const collapsedWidth = 60;
@@ -34,6 +35,7 @@ export default function ClippedDrawer({ children }) {
     { text: 'Danh mục', icon: <CategoryIcon />, path: '/categories-manager' },
     { text: 'Thương hiệu', icon: <BrandingWatermarkIcon />, path: '/brands-manager' },
     { text: 'Đơn hàng', icon: <ShoppingCartIcon />, path: '/order-manager' },
+    { text: 'Đánh giá', icon: <FaComment/>, path:'/reviews-manager'},
     { text: 'Nhân viên', icon: <PeopleIcon />, path: '/employee-manager' },
     { text: 'Khách hàng', icon: <PeopleIcon />, path: '/customer-manager' },
     { text: 'Mã giảm giá', icon: <DiscountIcon />, path: '/discount-manager' },

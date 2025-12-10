@@ -7,12 +7,17 @@ import { toast } from 'react-toastify';
 import { fetchDiscountsWithPaging } from '../../api/discounts.js';
 import { updateDiscountById } from '../../api/discounts.js';
 import { createDiscount } from '../../api/discounts.js';
+import Table from '../ui/Table.jsx';
 const DiscountManager = () => {
     const navigate = useNavigate();
     const [discounts, setDiscounts] = useState([]);
     const [keyword, setKeyword] = useState('');
+
+    const [currentPage, setCurrentPage] = useState(1);  // Table: 1-based
+    const [pageSize, setPageSize] = useState(10);
+    const [totalItems, setTotalItems] = useState(0); 
+
     const [page, setPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
 
     const [sortBy, setSortBy] = useState('id');
@@ -34,19 +39,19 @@ const DiscountManager = () => {
 
     useEffect(() => {
         loadDiscounts();
-    }, [page, sortBy, direction]);
+    }, [page, sortBy, direction, pageSize]);
     const loadDiscounts = async () => {
         setLoading(true);
         try {
             const data = await fetchDiscountsWithPaging({
                 page,
-                size: 10,
+                size: pageSize,
                 search: keyword,
                 sortBy,
                 direction,
             });
             setDiscounts(data.data);
-            setTotalPages(data.totalPages);
+            setTotalItems(data.totalElements);
         } catch (error) {
             console.error('Lỗi tải danh sách mã giảm giá:', error);
         } finally {
@@ -125,6 +130,22 @@ const DiscountManager = () => {
         setDirection(e.target.value);
         setPage(0); // về trang đầu
     };
+
+    const columns = [
+        { key: "code", label: "Code" },
+        { key: "title", label: "Title" },
+        {
+            key: "date",
+            label: "Thời gian",
+            render: (row) => {
+                const start = new Date(row.startAt).toLocaleDateString("vi-VN");
+                const end = new Date(row.endAt).toLocaleDateString("vi-VN");
+                return `${start} - ${end}`;
+            },
+        },
+        { key: "description", label: "Mô tả" },
+        { key: "usageLimit", label: "Giới hạn" },
+    ];
     return (
         <ClippedDrawer>
             <div className="p-6 max-w-7xl mx-auto space-y-6 bg-gray-50 min-h-[calc(100vh-80px)]">
@@ -205,49 +226,19 @@ const DiscountManager = () => {
                         <div className="ml-4 text-blue-600 font-medium text-lg">Đang tải dữ liệu...</div>
                     </div>
                 ) : (
-                    <table className="w-full table-auto bg-white shadow rounded">
-                        <thead className="bg-gray-100">
-                            <tr className="text-left">
-                                <th className="p-3">Code</th>
-                                <th className="p-3">Title</th>
-                                <th className="p-3">Thời gian</th>
-                                <th className="p-3">Mô tả</th>
-                                <th className="p-3">Giới hạn</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {discounts.length === 0 ? (
-                                <tr>
-                                    <td colSpan="3" className="text-center py-6">
-                                        <div className="flex flex-col items-center justify-center space-y-2">
-                                            <img
-                                                src="https://www.shutterstock.com/image-vector/no-result-document-file-data-600nw-2293706569.jpg"
-                                                alt="Không có dữ liệu"
-                                                className="w-32 h-32 object-contain opacity-60"
-                                            />
-                                            <p className="text-gray-500">Không có dữ liệu</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : (
-                                discounts.map((item) => (
-                                    <tr
-                                        key={item.id}
-                                        className="border-t hover:bg-blue-50 cursor-pointer"
-                                        onClick={() => handleEditClick(item)}
-                                    >
-                                        <td className="p-3">{item.code}</td>
-                                        <td className="p-3">{item.title}</td>
-                                        <td className="p-3">
-                                            {new Date(item.startAt).toLocaleDateString('vi-VN')} - {new Date(item.endAt).toLocaleDateString('vi-VN')}
-                                        </td>
-                                        <td className="p-3">{item.description || '-'}</td>
-                                        <td className="p-3">{item.usageLimit}</td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                    <Table
+                     columns={columns}
+                     pageSize={pageSize}
+                     currentPage={currentPage}
+                     totalItems={totalItems}
+                     data={discounts}
+                     onPaging={(p)=>{
+                        setCurrentPage(p);
+                        setPage(p-1)
+                     }}
+                     onPagingSizeChange={(size) => setPageSize(size)}
+                     onRowClick={(row) => handleEditClick(row)}
+                    />
                 )}
                 <Transition.Root show={!!editingDiscount} as={Fragment}>
                     <Dialog as="div" className="fixed inset-0 z-[9999]" onClose={() => setEditingDiscount(null)}>
@@ -434,23 +425,7 @@ const DiscountManager = () => {
                         </div>
                     </Dialog>
                 </Transition.Root>
-                <div className="flex justify-between items-center pt-4">
-                    <button
-                        disabled={page <= 0}
-                        onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                        className={`px-4 py-2 rounded ${page <= 0 ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
-                    >
-                        Trang trước
-                    </button>
-                    <span>Trang {page + 1} / {totalPages}</span>
-                    <button
-                        disabled={page + 1 >= totalPages}
-                        onClick={() => setPage((prev) => prev + 1)}
-                        className={`px-4 py-2 rounded ${page + 1 >= totalPages ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
-                    >
-                        Trang sau
-                    </button>
-                </div>
+                
             </div>
         </ClippedDrawer>
     );

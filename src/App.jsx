@@ -44,6 +44,7 @@ import ConfirmOrder from './components/product/ConfirmOrder'
 import ProductManagerEdit from './components/manager/ProductEdit'
 import ProductManagerEditVariant from './components/manager/ProductManagerEditVariant'
 import Review from './components/product/Review'
+import ReviewsManager from './components/manager/ReviewsManager'
 function App() {
 
   return (
@@ -95,6 +96,7 @@ function App() {
         <Route path="discount-manager" element={<DiscountManager />} />
         <Route path="order-manager" element={<OrderManager />} />
         <Route path="order-manager/:id" element={<OrderManagerDetailPage />} />
+        <Route path='reviews-manager' element={<ReviewsManager/>}/>
         <Route path="employee-manager" element={<EmployeeManager />} />
         <Route path="customer-manager" element={<CustomerManager />} />
         <Route path="analytics" element={<RevenueManager />} />

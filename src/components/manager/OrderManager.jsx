@@ -1,46 +1,79 @@
-import React, { useEffect, useState } from 'react'
-import ClippedDrawer from '../dashboard/DashboardLayoutBasic'
-import { useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react';
+import ClippedDrawer from '../dashboard/DashboardLayoutBasic';
+import { useNavigate } from 'react-router-dom';
 import { getOrder } from '../../api/order-manager';
+import Table from '../ui/Table';
 
 const OrderManager = () => {
     const navigate = useNavigate();
+
     const [listOrder, setListOrder] = useState([]);
     const [loading, setLoading] = useState(true);
+
     const [keyword, setKeyword] = useState('');
-    const [page, setPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
+
+    const [currentPage, setCurrentPage] = useState(1);  // Table: 1-based
+    const [pageSize, setPageSize] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
+
+    const [page, setPage] = useState(0); // API: 0-based
     const [sortBy, setSortBy] = useState('id');
     const [direction, setDirection] = useState('desc');
+
     const loadOrder = async () => {
         try {
             const data = await getOrder({
                 page,
-                size: 10,
+                size: pageSize,
                 sortBy,
                 direction,
+                keyword,
             });
-            setListOrder(data.data);
-            setTotalPages(data.totalPages);
+
+            setListOrder(data.data || []);
+            setTotalItems(data.totalElements || 0);
         } catch (error) {
             console.error('Lỗi tải đơn hàng:', error);
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     useEffect(() => {
         loadOrder();
-    }, [page, sortBy, direction]);
+    }, [page, pageSize, sortBy, direction]);
+
     const handleSortByChange = (e) => {
         setSortBy(e.target.value);
-        setPage(0); // về trang đầu
+        setPage(0);
     };
 
     const handleDirectionChange = (e) => {
         setDirection(e.target.value);
-        setPage(0); // về trang đầu
+        setPage(0);
     };
+
+    const handleSearch = () => {
+        setPage(0);
+        loadOrder();
+    };
+
+    const convertToTableData = (orders) =>
+        orders.flatMap(order =>
+            order.orderItems?.map(item => ({
+                orderId: order.id,
+                image: item.productVariant.imageUrl,
+                name: item.productVariant.name,
+                quantity: item.quantity,
+                price: item.unitAmount,
+                recipient: order.recipientName,
+                phone: order.recipientPhone,
+                address: order.deliveryAddress,
+                orderTime: order.orderTime,
+                finalAmount: order.finalAmount,
+                status: order.status,
+            })) || []
+        );
 
     const statusMap = {
         PENDING: { label: "Chờ xử lý", color: "bg-yellow-500" },
@@ -53,9 +86,58 @@ const OrderManager = () => {
         REFUNDED: { label: "Đã hoàn tiền", color: "bg-pink-500" },
         COMPLETED: { label: "Hoàn tất", color: "bg-green-600" }
     };
+
+    const columns = [
+        { key: "orderId", label: "Mã đơn" },
+        {
+            key: "image",
+            label: "Ảnh",
+            render: (row) => <img src={row.image} className="w-10 h-10 object-contain rounded" />
+        },
+        { key: "name", label: "Tên sản phẩm" },
+        { key: "quantity", label: "Số lượng" },
+        {
+            key: "price",
+            label: "Giá",
+            render: (row) => row.price.toLocaleString("vi-VN") + "₫",
+        },
+        { key: "recipient", label: "Người nhận" },
+        { key: "phone", label: "SĐT" },
+        { key: "address", label: "Địa chỉ" },
+        {
+            key: "orderTime",
+            label: "Ngày đặt",
+            render: (row) => new Date(row.orderTime).toLocaleString("vi-VN"),
+        },
+        {
+            key: "finalAmount",
+            label: "Tổng tiền",
+            render: (row) => <span className="text-red-500 font-semibold">{row.finalAmount.toLocaleString("vi-VN")}₫</span>,
+        },
+        {
+            key: "status",
+            label: "Trạng thái",
+            render: (row) => (
+                <span
+                    className={`px-2 py-1 text-xs rounded-full text-white whitespace-nowrap ${statusMap[row.status]?.color}`}
+                    style={{
+                        display: "inline-block",
+                        maxWidth: "120px",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                    }}
+                >
+                    {statusMap[row.status]?.label}
+                </span>
+            ),
+        },
+    ];
+
     return (
         <ClippedDrawer>
             <div className="p-6 max-w-7xl mx-auto space-y-6 bg-gray-50 min-h-[calc(100vh-80px)]">
+
+                {/* Breadcrumb */}
                 <div className="sticky top-16 z-10 bg-white border-b shadow-sm">
                     <div className="flex items-center text-sm text-gray-600 space-x-2 px-4 pt-2">
                         <button onClick={() => navigate('/tongquan')} className="hover:underline text-blue-600">
@@ -67,143 +149,64 @@ const OrderManager = () => {
                     <h2 className="text-xl font-semibold p-4">Quản lý đơn hàng</h2>
                 </div>
 
+                {/* Search + Sort */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                         <input
                             type="text"
-                            placeholder="Tìm theo tên danh mục..."
+                            placeholder="Tìm theo tên sản phẩm..."
                             className="border px-4 py-2 rounded w-72 outline-none"
                             value={keyword}
                             onChange={(e) => setKeyword(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                         />
-                        <button
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-                        >
+                        <button onClick={handleSearch} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
                             Tìm kiếm
                         </button>
                     </div>
+
                     <div className="flex gap-4 items-center justify-end">
-                        <select
-                            value={sortBy}
-                            onChange={handleSortByChange}
-                            className="border px-4 py-2 rounded w-48 outline-none"
-                        >
+                        <select value={sortBy} onChange={handleSortByChange} className="border px-4 py-2 rounded w-48">
                             <option value="id">Sắp xếp theo ID</option>
                             <option value="name">Sắp xếp theo tên</option>
                         </select>
 
-                        <select
-                            value={direction}
-                            onChange={handleDirectionChange}
-                            className="border px-4 py-2 rounded w-36 outline-none"
-                        >
+                        <select value={direction} onChange={handleDirectionChange} className="border px-4 py-2 rounded w-36">
                             <option value="asc">Tăng dần</option>
                             <option value="desc">Giảm dần</option>
                         </select>
                     </div>
                 </div>
+
+                {/* Table */}
                 {loading ? (
                     <div className="flex justify-center items-center py-10">
                         <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-r-transparent"></div>
                         <div className="ml-4 text-blue-600 font-medium text-lg">Đang tải dữ liệu...</div>
                     </div>
                 ) : (
-                    <table className="w-full table-auto bg-white shadow rounded">
-                        <thead className="bg-gray-100">
-                            <tr className="text-left">
-                                <th className="p-3">Mã đơn</th>
-                                <th className="p-3">Ảnh sản phẩm</th>
-                                <th className="p-3">Tên sản phẩm</th>
-                                <th className="p-3">Số lượng</th>
-                                <th className="p-3">Giá</th>
-                                <th className="p-3">Người nhận</th>
-                                <th className="p-3">SĐT</th>
-                                <th className="p-3">Địa chỉ giao hàng</th>
-                                <th className="p-3">Ngày đặt</th>
-                                <th className="p-3">Tổng tiền</th>
-                                <th className="p-3">Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {listOrder.length === 0 ? (
-                                <tr>
-                                    <td colSpan="11" className="text-center py-6">
-                                        <div className="flex flex-col items-center justify-center space-y-2">
-                                            <img
-                                                src="https://www.shutterstock.com/image-vector/no-result-document-file-data-600nw-2293706569.jpg"
-                                                alt="Không có dữ liệu"
-                                                className="w-32 h-32 object-contain opacity-60"
-                                            />
-                                            <p className="text-gray-500">Không có dữ liệu</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : (
-                                listOrder.map((order) =>
-                                    order.orderItems.map((item) => (
-                                        <tr
-                                            key={`${order.id}-${item.id}`}
-                                            className="border-t hover:bg-blue-50 cursor-pointer"
-                                            onClick={() => navigate(`/order-manager/${order.id}`)}
-                                        >
-                                            <td className="p-3">{order.id}</td>
-                                            <td className="p-3">
-                                                <img
-                                                    src={item.productVariant.imageUrl}
-                                                    alt={item.productVariant.name}
-                                                    className="h-10 w-auto object-contain"
-                                                />
-                                            </td>
-                                            <td className="p-3">{item.productVariant.name}</td>
-                                            <td className="p-3">{item.quantity}</td>
-                                            <td className="p-3">
-                                                {item.unitAmount.toLocaleString("vi-VN")}₫
-                                            </td>
-                                            <td className="p-3">{order.recipientName || "—"}</td>
-                                            <td className="p-3">{order.recipientPhone || "—"}</td>
-                                            <td className="p-3">{order.deliveryAddress}</td>
-                                            <td className="p-3">
-                                                {new Date(order.orderTime).toLocaleString("vi-VN")}
-                                            </td>
-                                            <td className="p-3 font-semibold text-red-500">
-                                                {order.finalAmount.toLocaleString("vi-VN")}₫
-                                            </td>
-                                            <td className="p-3 w-36">
-                                                <span
-                                                    className={`px-1 py-1 rounded text-white ${statusMap[order.status]?.color || "bg-gray-500"}`}
-                                                >
-                                                    {statusMap[order.status]?.label || order.status}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )
-                            )}
-                        </tbody>
-                    </table>
+                    <Table
+                        columns={columns}
+                        data={convertToTableData(listOrder)}
+                        pageSize={pageSize}
+                        totalItems={totalItems}
+                        currentPage={currentPage}
+                        onPaging={(p)=>{
+                            setCurrentPage(p)
+                            setPage(p-1)
+                        }}
+                        onPagingSizeChange={(size)=>{
+                            setPageSize(size)
+                            setCurrentPage(1)
+                            setPage(0)
+                        }}
+                        onRowClick={(row) => navigate(`/order-manager/${row.orderId}`)}
+                    />
                 )}
-                <div className="flex justify-between items-center pt-4">
-                    <button
-                        disabled={page <= 0}
-                        onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                        className={`px-4 py-2 rounded ${page <= 0 ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
-                    >
-                        Trang trước
-                    </button>
-                    <span>Trang {page + 1} / {totalPages}</span>
-                    <button
-                        disabled={page + 1 >= totalPages}
-                        onClick={() => setPage((prev) => prev + 1)}
-                        className={`px-4 py-2 rounded ${page + 1 >= totalPages ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
-                    >
-                        Trang sau
-                    </button>
-                </div>
+
             </div>
         </ClippedDrawer>
+    );
+};
 
-    )
-}
-
-export default OrderManager
+export default OrderManager;

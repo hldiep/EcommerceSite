@@ -5,12 +5,17 @@ import { createCategory, fetchCategoriesWithPaging, updateCategoryById } from '.
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { toast } from 'react-toastify';
+import Table from '../ui/Table';
 const CategoriesManager = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [keyword, setKeyword] = useState('');
+
+  const [currentPage, setCurrentPage] = useState(1);  // Table: 1-based
+  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);  
+
   const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const [sortBy, setSortBy] = useState('id');
@@ -25,19 +30,20 @@ const CategoriesManager = () => {
 
   useEffect(() => {
     loadCategories();
-  }, [page, sortBy, direction]);
+  }, [page, sortBy, direction, pageSize, keyword]);
   const loadCategories = async () => {
     setLoading(true);
     try {
       const data = await fetchCategoriesWithPaging({
         page,
-        size: 10,
+        size: pageSize,
         search: keyword,
         sortBy,
         direction,
       });
+      console.log("data: ", data)
       setCategories(data.data);
-      setTotalPages(data.totalPages);
+      setTotalItems(data.totalElements || 0);
     } catch (error) {
       console.error('Lỗi tải danh mục:', error);
     } finally {
@@ -98,6 +104,12 @@ const CategoriesManager = () => {
     setDirection(e.target.value);
     setPage(0); // về trang đầu
   };
+
+  const columns = [
+    {key: "id", label: "ID"}, 
+    {key: "name", label: "Tên danh mục"}, 
+    {key: "seoName", label: "Seo name"}, 
+  ]
   return (
     <ClippedDrawer>
       <div className="p-6 max-w-7xl mx-auto space-y-6 bg-gray-50 min-h-[calc(100vh-80px)]">
@@ -171,44 +183,23 @@ const CategoriesManager = () => {
             <div className="ml-4 text-blue-600 font-medium text-lg">Đang tải dữ liệu...</div>
           </div>
         ) : (
-          <table className="w-full table-auto bg-white shadow rounded">
-            <thead className="bg-gray-100">
-              <tr className="text-left">
-                <th className="p-3">ID</th>
-                <th className="p-3">Tên danh mục</th>
-                <th className="p-3">SEO Name</th>
-              </tr>
-            </thead>
-            <tbody>
-              {categories.length === 0 ? (
-                <tr>
-                  <td colSpan="3" className="text-center py-6">
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                      <img
-                        src="https://www.shutterstock.com/image-vector/no-result-document-file-data-600nw-2293706569.jpg"
-                        alt="Không có dữ liệu"
-                        className="w-32 h-32 object-contain opacity-60"
-                      />
-                      <p className="text-gray-500">Không có dữ liệu</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                categories.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="border-t hover:bg-blue-50 cursor-pointer"
-                    onClick={() => handleEditClick(item)}
-                  >
-                    <td className="p-3">{item.id}</td>
-                    <td className="p-3">{item.name}</td>
-                    <td className="p-3 text-gray-500">{item.seoName}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
+          <Table
+            columns={columns}
+            data={categories}
+            pageSize={pageSize}
+            totalItems={totalItems}
+            currentPage={currentPage}
+            onPaging={(p)=>{
+              setCurrentPage(p);
+              setPage(p - 1);
+            }}
+            onPagingSizeChange={(size)=>{
+              setPageSize(size);
+              setCurrentPage(1);
+              setPage(0);
+            }}
+            onRowClick={(row) => handleEditClick(row)}/>
+          )}
         <Transition.Root show={!!editingCategory} as={Fragment}>
           <Dialog as="div" className="fixed inset-0 z-[9999]" onClose={() => setEditingCategory(null)}>
             <Transition.Child
@@ -310,23 +301,7 @@ const CategoriesManager = () => {
             </div>
           </Dialog>
         </Transition.Root>
-        <div className="flex justify-between items-center pt-4">
-          <button
-            disabled={page <= 0}
-            onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-            className={`px-4 py-2 rounded ${page <= 0 ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
-          >
-            Trang trước
-          </button>
-          <span>Trang {page + 1} / {totalPages}</span>
-          <button
-            disabled={page + 1 >= totalPages}
-            onClick={() => setPage((prev) => prev + 1)}
-            className={`px-4 py-2 rounded ${page + 1 >= totalPages ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
-          >
-            Trang sau
-          </button>
-        </div>
+        
       </div>
     </ClippedDrawer>
   );

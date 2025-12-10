@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaHeart, FaHome, FaStar } from 'react-icons/fa';
 import { useNavigate, useParams } from 'react-router-dom';
-import { MdLocalOffer } from 'react-icons/md';
 import { BiSortUp, BiSortDown } from "react-icons/bi";
 import { fetchProductsPublicWithPaging } from '../../api/product';
 import { fetchBrandById } from '../../api/brand';

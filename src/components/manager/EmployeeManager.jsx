@@ -4,18 +4,18 @@ import { useNavigate } from 'react-router-dom';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { toast } from 'react-toastify';
-import { upload } from '../../api/upload-file';
 import { createEmployee, fetchEmployeeWithPaging, updateEmployeeById } from '../../api/employee';
+import Table from '../ui/Table';
 const EmployeeManager = () => {
     const navigate = useNavigate();
     const [employees, setEmployees] = useState([]);
     const [keyword, setKeyword] = useState('');
-    const [page, setPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
-    const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
 
-    const [isUploading, setIsUploading] = useState(false);
-    const [error, setError] = useState('');
+    const [page, setPage] = useState(0);
+    const [loading, setLoading] = useState(true);
 
     const [sortBy, setSortBy] = useState('id');
     const [direction, setDirection] = useState('desc');
@@ -34,19 +34,19 @@ const EmployeeManager = () => {
 
     useEffect(() => {
         loadEmployee();
-    }, [page, sortBy, direction, keyword]);
+    }, [page, sortBy, direction, keyword, pageSize]);
     const loadEmployee = async () => {
         setLoading(true);
         try {
             const data = await fetchEmployeeWithPaging({
                 page,
-                size: 10,
+                size: pageSize,
                 keyword,
                 sortBy,
                 direction,
             });
             setEmployees(data.data);
-            setTotalPages(data.totalPages);
+            setTotalItems(data.totalElements || 0);
         } catch (error) {
             console.error('Lỗi tải nhân viên:', error);
         } finally {
@@ -147,6 +147,30 @@ const EmployeeManager = () => {
         setPage(0); // về trang đầu
     };
 
+    const columns = [
+        { key: "username", label: "Tên đăng nhập" },
+        { key: "fullName", label: "Họ và tên" },
+        { key: "email", label: "Email" },
+        { key: "phone", label: "Số điện thoại" },
+        { key: "gender", label: "Giới tính" },
+        {
+            key: "birthday",
+            label: "Ngày sinh",
+            render: (row) => row.birthday ? row.birthday.split("T")[0] : ""
+        },
+        { key: "address", label: "Địa chỉ" },
+        {
+            key: "role",
+            label: "Vai trò",
+            render: (row) => row.role?.name || ""
+        },
+        {
+            key: "status",
+            label: "Trạng thái",
+            render: (row) => row.status
+        }
+    ];
+
     return (
         <ClippedDrawer>
             <div className="p-6 max-w-7xl mx-auto space-y-6 bg-gray-50 min-h-[calc(100vh-80px)]">
@@ -225,56 +249,23 @@ const EmployeeManager = () => {
                         <div className="ml-4 text-blue-600 font-medium text-lg">Đang tải dữ liệu...</div>
                     </div>
                 ) : (
-                    <table className="w-full table-auto bg-white shadow rounded">
-                        <thead className="bg-gray-100">
-                            <tr className="text-left">
-                                <th className="p-3">Tên đăng nhập</th>
-                                <th className="p-3">Họ và tên</th>
-                                <th className="p-3">Email</th>
-                                <th className="p-3">Số điện thoại</th>
-                                <th className="p-3">Giới tính</th>
-                                <th className="p-3">Ngày sinh</th>
-                                <th className="p-3">Địa chỉ</th>
-                                <th className="p-3">Vai trò</th>
-                                <th className="p-3">Trạng thái</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {employees.length === 0 ? (
-                                <tr>
-                                    <td colSpan="3" className="text-center py-6">
-                                        <div className="flex flex-col items-center justify-center space-y-2">
-                                            <img
-                                                src="https://www.shutterstock.com/image-vector/no-result-document-file-data-600nw-2293706569.jpg"
-                                                alt="Không có dữ liệu"
-                                                className="w-32 h-32 object-contain opacity-60"
-                                            />
-                                            <p className="text-gray-500">Không có dữ liệu</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ) : (
-                                employees.map((item) => (
-                                    <tr
-                                        key={item.id}
-                                        className="border-t hover:bg-blue-50 cursor-pointer"
-                                        onClick={() => handleEditClick(item)}
-                                    >
-                                        <td className="p-3">{item.username}</td>
-                                        <td className="p-3">{item.fullName}</td>
-                                        <td className="p-3">{item.email}</td>
-                                        <td className="p-3">{item.phone}</td>
-                                        <td className="p-3">{item.gender}</td>
-                                        <td className="p-3">{item.birthday ? item.birthday.split('T')[0] : ''}</td>
-                                        <td className="p-3">{item.address}</td>
-                                        <td className="p-3">{item.role.name}</td>
-                                        <td className="p-3">{item.status}</td>
-
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                    <Table
+                        columns={columns}
+                        data={employees}
+                        pageSize={pageSize}
+                        totalItems={totalItems}
+                        currentPage={currentPage}
+                        onPaging={(p)=>{
+                            setCurrentPage(p)
+                            setPage(p-1)
+                        }}
+                        onPagingSizeChange={(size)=>{
+                            setPageSize(size)
+                            setCurrentPage(1)
+                            setPage(0)
+                        }}
+                        onRowClick={(row)=>handleEditClick(row)}
+                    />
                 )}
                 <Transition.Root show={!!editing} as={Fragment}>
                     <Dialog as="div" className="fixed inset-0 z-[9999]" onClose={() => setEditing(null)}>
@@ -459,23 +450,7 @@ const EmployeeManager = () => {
                         </div>
                     </Dialog>
                 </Transition.Root>
-                <div className="flex justify-between items-center pt-4">
-                    <button
-                        disabled={page <= 0}
-                        onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                        className={`px-4 py-2 rounded ${page <= 0 ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
-                    >
-                        Trang trước
-                    </button>
-                    <span>Trang {page + 1} / {totalPages}</span>
-                    <button
-                        disabled={page + 1 >= totalPages}
-                        onClick={() => setPage((prev) => prev + 1)}
-                        className={`px-4 py-2 rounded ${page + 1 >= totalPages ? 'bg-gray-200' : 'bg-blue-600 text-white'}`}
-                    >
-                        Trang sau
-                    </button>
-                </div>
+                
             </div>
         </ClippedDrawer>
     );

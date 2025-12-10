@@ -2,13 +2,13 @@ import React, { useState, useRef, useEffect } from "react";
 import { FaRobot, FaTimes } from "react-icons/fa";
 import { fetchChatAICompare } from "../../api/chat-ai";
 import ReactMarkdown from "react-markdown";
-import { motion, AnimatePresence } from "framer-motion"; // 💫 thêm dòng này
+import { motion, AnimatePresence } from "framer-motion"; 
 
 const Chatbot = () => {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
-    { type: "bot", text: "Xin chào Anh/Chị! Em là trợ lý AI của cửa hàng 😊" },
+    { type: "bot", text: "Xin chào Anh/Chị! Em là trợ lý AI của cửa hàng. Anh chị có thắc mắc hay muốn tư vấn gì th" },
   ]);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -17,6 +17,19 @@ const Chatbot = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const buildHistory=(messages)=>{
+    const history=[];
+    for(let i=0;i<messages.length;i++){
+      if(messages[i].type==="user"){
+        const nextBot=messages[i+1]?.type==="bot"?messages[i+1].text:"";
+        history.push({
+          user:messages[i].text,
+          assistant:nextBot,
+        });
+      }
+    }
+    return history;
+  }
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -26,16 +39,17 @@ const Chatbot = () => {
     setLoading(true);
 
     try {
-      const res = await fetchChatAICompare(userMessage.text); // gửi text
+      const history=buildHistory([...messages,userMessage]);
+      const res = await fetchChatAICompare(userMessage.text,history); 
       const botMessage = {
         type: "bot",
-        text: res || "Em chưa có câu trả lời ạ.",
+        text: res || "Hiện tại em chưa có câu trả lời.",
       };
       setMessages((prev) => [...prev, botMessage]);
     } catch {
       setMessages((prev) => [
         ...prev,
-        { type: "bot", text: "Xin lỗi, hiện tại không thể kết nối tới AI 😢" },
+        { type: "bot", text: "Xin lỗi, hiện tại em chưa có câu trả lời" },
       ]);
     } finally {
       setLoading(false);

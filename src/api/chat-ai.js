@@ -74,25 +74,53 @@ const API_URL = `/api/v1/ai/chat`;
 //   }
 // };
 
-export const fetchChatAICompare = async (text) => {
-  try {
-    const queryParam = encodeURIComponent(text);
-    const response = await fetch(`${API_URL}-2?query=${queryParam}`, {
-      method: "GET",
-      headers: {
+// export const fetchChatAICompare = async (text) => {
+//   try {
+//     const queryParam = encodeURIComponent(text);
+//     const response = await fetch(`${API_URL}-2?query=${queryParam}`, {
+//       method: "GET",
+//       headers: {
+//         Accept: "*/*",
+//       },
+//     });
+
+//     if (!response.ok) {
+//       throw new Error(await response.text());
+//     }
+
+//     const json = await response.json();
+//     console.log("AI compare response:", json);
+//     return json.data;
+//   } catch (error) {
+//     console.error("Error fetching AI compare:", error);
+//     throw error;
+//   }
+// };
+
+export const fetchChatAICompare = async(text, history)=>{
+  try{
+    const res=await fetch(`${API_URL}-2`,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
         Accept: "*/*",
       },
+      body: JSON.stringify({
+        query: text,
+        history: history.map(h => ({
+        user: h.user,
+        assistant: h.assistant || "..."
+      }))
+    })
     });
-
-    if (!response.ok) {
-      throw new Error(await response.text());
+    if(!res.ok){
+      throw new Error(await res.text())      
     }
-
-    const json = await response.json();
-    console.log("AI compare response:", json);
+    const json=await res.json();
+    console.log("AI compare response: ",json);
     return json.data;
-  } catch (error) {
-    console.error("Error fetching AI compare:", error);
+  }catch(error){
+    console.error("Error fetching AI compare: ", error);
     throw error;
   }
-};
+}

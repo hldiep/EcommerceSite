@@ -7,6 +7,7 @@ import { fetchProductsPublicWithPaging } from '../../api/product';
 const SearchResults = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const [selected, setSelected] = useState("popular");
     const queryParams = new URLSearchParams(location.search);
     const keyword = queryParams.get('keyword');
     const [results, setResults] = useState([]);
@@ -15,8 +16,11 @@ const SearchResults = () => {
     const [hasMore, setHasMore] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
 
-    const [sortBy, setSortBy] = useState(null);
-    const [direction, setDirection] = useState(null);
+    const options=[
+        { key: "relevant", label: "Liên quan", icon: <FaStar className="text-blue-600" /> },
+        { key: "price-asc", label: "Giá Thấp - Cao", icon: <BiSortUp className="text-black" /> },
+        { key: "price-desc", label: "Giá Cao - Thấp", icon: <BiSortDown className="text-black" /> },
+    ]
     const fetchData = async (currentPage = 0, append = false) => {
         try {
             const data = await fetchProductsPublicWithPaging({ keyword, page: currentPage });
@@ -50,28 +54,32 @@ const SearchResults = () => {
         await fetchData(nextPage, true);
         setLoadingMore(false);
     };
-    const handleSort = (sortType) => {
-        let sortedResults = [...results];
+    const handleSort = (sortKey) => {
+        setSelected(sortKey);
 
-        if (sortType === 'asc') {
-            sortedResults.sort((a, b) => {
+        if (sortKey === "price-asc") {
+            const sorted = [...results].sort((a, b) => {
                 const priceA = a.productVariants?.[0]?.priceSale || a.productVariants?.[0]?.price || 0;
                 const priceB = b.productVariants?.[0]?.priceSale || b.productVariants?.[0]?.price || 0;
                 return priceA - priceB;
             });
-        } else if (sortType === 'desc') {
-            sortedResults.sort((a, b) => {
+            setResults(sorted);
+
+        } else if (sortKey === "price-desc") {
+            const sorted = [...results].sort((a, b) => {
                 const priceA = a.productVariants?.[0]?.priceSale || a.productVariants?.[0]?.price || 0;
                 const priceB = b.productVariants?.[0]?.priceSale || b.productVariants?.[0]?.price || 0;
                 return priceB - priceA;
             });
-        } else if (sortType === 'relevant') {
-            fetchData(0);
-            return;
-        }
+            setResults(sorted);
 
-        setResults(sortedResults);
+        } else if (sortKey === "relevant") {
+            setPage(0);
+            setHasMore(true);
+            fetchData(0, false);   
+        }
     };
+
     return (
         <div className="min-h-screen bg-gray-50 flex justify-center">
             <div className='container mt-28 mb-10'>
@@ -82,27 +90,23 @@ const SearchResults = () => {
                     <span className="text-gray-700">/</span>
                     <span className="text-black font-medium">Kết quả tìm kiếm cho: <strong>{keyword}</strong></span>
                 </div>
-                <div className="mt-4 mb-10">
-                    <p className='text-xl font-semibold'>Sắp xếp theo:</p>
-                    <div className='flex space-x-4 text-sm mt-5'>
-                        <button
-                            className="border border-red-500 text-red-500 rounded-lg px-2 py-1"
-                            onClick={() => handleSort('relevant')}
-                        >
-                            Liên quan
-                        </button>
-                        <button
-                            className="border border-red-500 rounded-lg px-2 py-1 flex items-center space-x-1"
-                            onClick={() => handleSort('desc')}
-                        >
-                            <BiSortUp /><p>Giá cao</p>
-                        </button>
-                        <button
-                            className="border border-red-500 rounded-lg px-2 py-1 flex items-center space-x-1"
-                            onClick={() => handleSort('asc')}
-                        >
-                            <BiSortDown /><p>Giá thấp</p>
-                        </button>
+                <div className="mb-6 flex mt-6 justify-between">
+                    <h2 className="text-base font-semibold mb-2 mt-2">Sắp xếp theo</h2>
+                    <div className="flex flex-wrap gap-2">
+                        {options.map((option) => (
+                            <button
+                                key={option.key}
+                                onClick={() => handleSort(option.key)}
+                                className={`flex items-center gap-1 px-4 py-2 rounded-full border text-sm font-medium transition
+          ${selected === option.key
+                                        ? "border-blue-500 text-blue-600 bg-blue-50"
+                                        : "border-gray-200 text-black bg-gray-100 hover:bg-gray-200"
+                                    }`}
+                            >
+                                {option.icon}
+                                {option.label}
+                            </button>
+                        ))}
                     </div>
                 </div>
                 {loading ? (
