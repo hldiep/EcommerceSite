@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FaRobot, FaTimes } from "react-icons/fa";
-import { fetchChatAICompare } from "../../api/chat-ai";
+import { fetchChatAI } from "../../api/chat-ai";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion"; 
 
@@ -40,7 +40,7 @@ const Chatbot = () => {
 
     try {
       const history=buildHistory([...messages,userMessage]);
-      const res = await fetchChatAICompare(userMessage.text,history); 
+      const res = await fetchChatAI(userMessage.text,history); 
       const botMessage = {
         type: "bot",
         text: res || "Hiện tại em chưa có câu trả lời.",
