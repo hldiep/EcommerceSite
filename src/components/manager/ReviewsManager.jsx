@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ClippedDrawer from "../dashboard/DashboardLayoutBasic";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { fetchReviewsWithPaging } from "../../api/reviews";
 import Table from "../ui/Table";
 
@@ -21,14 +21,28 @@ const ReviewsManager = () => {
   const [loading, setLoading] = useState(true);
 
   const columns = [
-    { key: "id", label: "ID", type: "text" },
-    { key: "title", label: "Title", type: "text" },
-    { key: "productName", label: "Product", type: "text" },
+    { 
+      key: "productId", 
+      label: "Mã sản phẩm",
+      render: (row) => (
+        <Link 
+          to={`/products-manager/${row.productId}`} 
+          className="text-blue-600 hover:underline"
+        >
+          {row.productId}
+        </Link>
+      )
+    },
+    { key: "rating", label: "Rating" },
+    { key: "fullName", label: "Khách hàng" },
+    { key: "username", label: "Tài khoản" },
+    { key: "comment", label: "Đánh giá" },
+    { key: "status", label: "Trạng thái" },
   ];
 
   useEffect(() => {
     loadReviews();
-  }, [currentPage, pageSize, sortBy, direction, keyword]); // ← THÊM keyword
+  }, [currentPage, pageSize, sortBy, direction, keyword]); 
 
   const loadReviews = async () => {
     setLoading(true);
@@ -41,8 +55,9 @@ const ReviewsManager = () => {
         direction,
       });
 
+      console.log("Data", data)
       setReviews(data.data);
-      setTotalItems(data.totalItems);
+      setTotalItems(data.totalElements || 0);
     } catch (err) {
       console.error("Lỗi tải reviews:", err);
     } finally {
@@ -141,7 +156,6 @@ const ReviewsManager = () => {
               setCurrentPage(1)
               setPage(0)
             }}
-            onRowClick={(row)=>handleEditClick(row)}
           />
         )}
       </div>

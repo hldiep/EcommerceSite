@@ -45,6 +45,7 @@ import ProductManagerEdit from './components/manager/ProductEdit'
 import ProductManagerEditVariant from './components/manager/ProductManagerEditVariant'
 import Review from './components/product/Review'
 import ReviewsManager from './components/manager/ReviewsManager'
+import ReviewPage from './components/user/ReviewPage'
 function App() {
 
   return (
@@ -68,6 +69,7 @@ function App() {
           <Route path="detail/:id" element={<Detail />} />
           <Route path="/compare" element={<ProductCompare />} />
           <Route path="profile" element={<User />} />
+          <Route path="profile/review/:productVariantId" element={<ReviewPage />} />
           <Route path="search" element={<SearchResults />} />
           <Route path="cart" element={<Cart />} />
           <Route path="quick-order" element={<QuickOrder />} />

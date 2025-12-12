@@ -16,7 +16,6 @@ const ProductManager = () => {
     const [totalItems, setTotalItems] = useState(0);
 
     const [page, setPage] = useState(0);
-    const [size] = useState(10);
     const [products, setProducts] = useState([]);
     const [brandId, setBrandId] = useState('');
     const [categoryId, setCategoryId] = useState('');

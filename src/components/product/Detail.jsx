@@ -408,7 +408,7 @@ const Detail = () => {
                             </div>
                             <div>
                                 <h2 className="text-xl font-semibold mb-2 mt-4">Đánh giá</h2>
-                                <Review/>
+                                <Review productId={id} />
                             </div>
                         </div>
                     </div>

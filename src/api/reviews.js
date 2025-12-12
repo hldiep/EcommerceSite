@@ -11,7 +11,7 @@ export const fetchReviewsWithPaging = async ({ page = 0, size = 10, search = '' 
         url.searchParams.append('page', page);
         url.searchParams.append('size', size);
         url.searchParams.append('sortBy', 'id');
-        url.searchParams.append('direction', 'asc');
+        url.searchParams.append('direction', 'desc');
 
         if (search) {
             url.searchParams.append('search', search);

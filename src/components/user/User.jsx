@@ -3,6 +3,7 @@ import { FaHistory, FaHome, FaShoppingCart, FaSignOutAlt, FaTags, FaUserCircle }
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getHistory } from '../../api/order';
+import { fetchReviewsByProductId } from '../../api/review';
 const statusMap = {
     PENDING: { label: "Chờ xử lý", color: "text-yellow-500" },
     CONFIRMED: { label: "Đã xác nhận", color: "text-blue-500" },
@@ -20,8 +21,6 @@ const User = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
     const [orderHistory, setOrderHistory] = useState([]);
-
-    const [recentOrders, setRecentOrders] = useState([]);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -45,6 +44,7 @@ const User = () => {
                 page,
                 size: 20,
             });
+            console.log("Data: ", data)
             setOrderHistory(data.data);
             setTotalPages(data.totalPages);
         } catch (error) {
@@ -171,7 +171,7 @@ const User = () => {
                                                             ) : 'Không có sản phẩm'}
                                                         </td>
                                                         <td className="px-4 py-2 border">
-                                                            {(Number(order.totalAmount) || 0).toLocaleString('vi-VN')} ₫
+                                                            {(Number(order.totalAmount + order.shipAmount - order.discountAmount) || 0).toLocaleString('vi-VN')} ₫
                                                         </td>
                                                         <td className="px-4 py-2 border">
                                                             {statusMap[order.status] ? (
@@ -199,7 +199,6 @@ const User = () => {
                                 )}
                             </div>
                         )}
-
                         {activeTab === 'history' && (
                             <div>
                                 <h2 className="font-semibold text-lg mb-3">Lịch sử mua hàng</h2>
@@ -233,16 +232,33 @@ const User = () => {
                                                             {order.orderItems && order.orderItems.length > 0 ? (
                                                                 <ul className="list-disc pl-4">
                                                                     {order.orderItems.map((item, idx) => (
-                                                                        <li key={idx}>
-                                                                            {item.productVariant?.name || `SP #${item.productVariant?.id}`}
-                                                                            {' - SL: '}{item.quantity}
+                                                                        <li key={idx} className="flex justify-between items-center">
+                                                                        <span>
+                                                                            {item.productVariant?.name || `SP #${item.productVariant?.id}`} - SL: {item.quantity}
+                                                                        </span>
+
+                                                                        {order.status === "COMPLETED" && (
+                                                                            <button
+                                                                            onClick={() =>
+                                                                                
+                                                                                navigate(`/profile/review/${item.productVariant.product.id}`, {
+                                                                                    state: {
+                                                                                        productId: item.productVariant.product.id
+                                                                                    }
+                                                                                })
+                                                                            }
+                                                                            className="ml-2 px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                                                                            >
+                                                                            Đánh giá
+                                                                            </button>
+                                                                        )}
                                                                         </li>
                                                                     ))}
                                                                 </ul>
                                                             ) : 'Không có sản phẩm'}
                                                         </td>
                                                         <td className="px-4 py-2 border">
-                                                            {(Number(order.totalAmount) || 0).toLocaleString('vi-VN')} ₫
+                                                            {(Number(order.totalAmount + order.shipAmount - order.discountAmount) || 0).toLocaleString('vi-VN')} ₫
                                                         </td>
                                                         <td className="px-4 py-2 border">
                                                             {statusMap[order.status] ? (
