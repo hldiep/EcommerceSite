@@ -45,10 +45,6 @@ const CustomerManager = () => {
             setLoading(false);
         }
     };
-    const handleSearch = () => {
-        setPage(0);
-        loadCustomer();
-    };
 
     const handleEditClick = (customer) => {
         setEditing(customer);
@@ -113,20 +109,15 @@ const CustomerManager = () => {
 
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
+                        <label htmlFor="">Tìm kiếm</label>
                         <input
                             type="text"
-                            placeholder="Tìm theo tên danh mục..."
+                            placeholder="Tìm theo tên..."
                             className="border px-4 py-2 rounded w-72 outline-none"
                             value={keyword}
                             onChange={(e) => setKeyword(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            onKeyDown={(e) => e.key === 'Enter'}
                         />
-                        <button
-                            onClick={handleSearch}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-                        >
-                            Tìm kiếm
-                        </button>
                     </div>
                     <div className="flex gap-4 items-center justify-end">
                         <select

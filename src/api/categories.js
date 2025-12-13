@@ -68,7 +68,7 @@ export const fetchCategoryById = async (id) => {
 export const fetchCategoriesWithPaging = async ({
     page = 0,
     size = 10,
-    search = '',
+    keyword = '',
     sortBy = 'id',
     direction = 'asc',
 }) => {
@@ -81,7 +81,9 @@ export const fetchCategoriesWithPaging = async ({
         url.searchParams.append('size', size);
         url.searchParams.append('sortBy', sortBy);
         url.searchParams.append('direction', direction);
-        if (search) url.searchParams.append('search', search);
+        if (keyword && keyword.trim() !== '') {
+            url.searchParams.append('keyword', keyword.trim());
+        }
 
         const response = await fetch(url, {
             method: 'GET',

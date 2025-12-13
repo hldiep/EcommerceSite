@@ -45,6 +45,7 @@ const Detail = () => {
             try {
                 setLoading(true);
                 const data = await fetchProductPublicById(id);
+                console.log("Data", data)
                 setProduct(data);
                 setSelectedVariant(data?.variants?.[0] || null);
             } catch (error) {
@@ -158,7 +159,8 @@ const Detail = () => {
         navigate('/compare', { state: { products: compareItems } });
     };
     const handleClose = async () => {
-        setShowCompareBar(false)
+        setShowCompareBar(false);
+        setCompareItems([]);
     };
 
     return (

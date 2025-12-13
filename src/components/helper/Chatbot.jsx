@@ -8,7 +8,7 @@ const Chatbot = () => {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
-    { type: "bot", text: "Xin chào Anh/Chị! Em là trợ lý AI của cửa hàng. Anh chị có thắc mắc hay muốn tư vấn gì th" },
+    { type: "bot", text: "Xin chào Anh/Chị! Em là trợ lý AI của cửa hàng. Em sẵn sàng hỗ trợ tư vấn sản phẩm, so sánh giá và giải đáp mọi thắc mắc của Anh/Chị." },
   ]);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);

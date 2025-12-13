@@ -50,7 +50,7 @@ const ReviewsManager = () => {
       const data = await fetchReviewsWithPaging({
         page,
         size: pageSize,
-        search: keyword,
+        keyword: keyword,
         sortBy,
         direction,
       });
@@ -64,11 +64,6 @@ const ReviewsManager = () => {
       setLoading(false);
     }
   };
-
-  const handleSearch = () => {
-    setCurrentPage(1); // ← KHÔNG gọi loadReviews nữa
-  };
-
   return (
     <ClippedDrawer>
       <div className="p-6 max-w-7xl mx-auto space-y-6 bg-gray-50 min-h-[calc(100vh-80px)]">
@@ -89,20 +84,15 @@ const ReviewsManager = () => {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
+            <label htmlFor="">Tìm kiếm</label>
             <input
               type="text"
-              placeholder="Tìm kiếm..."
+              placeholder="Nhập tìm kiếm..."
               className="border px-4 py-2 rounded w-72 outline-none"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              onKeyDown={(e) => e.key === "Enter"}
             />
-            <button
-              onClick={handleSearch}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-            >
-              Tìm kiếm
-            </button>
           </div>
 
           <div className="flex gap-4 items-center justify-end">

@@ -27,6 +27,27 @@ const CategoriesManager = () => {
     categoryParentId: '',
     status: 'ACTIVE',
   });
+  const parentOptions = categories.filter(c => !editingCategory || c.id !== editingCategory.id);
+  const flattenCategories = (categories, parent = null, level = 0) => {
+    let result = [];
+
+    categories.forEach(cat => {
+      result.push({
+        ...cat,
+        parent,          // object cha
+        parentId: parent?.id || null,
+        level,           // cấp độ (0,1,2...)
+      });
+
+      if (cat.children && cat.children.length > 0) {
+        result = result.concat(
+          flattenCategories(cat.children, cat, level + 1)
+        );
+      }
+    });
+
+    return result;
+  };
 
   useEffect(() => {
     loadCategories();
@@ -37,12 +58,14 @@ const CategoriesManager = () => {
       const data = await fetchCategoriesWithPaging({
         page,
         size: pageSize,
-        search: keyword,
+        keyword: keyword,
         sortBy,
         direction,
       });
       console.log("data: ", data)
-      setCategories(data.data);
+      const flatData = flattenCategories(data.data);
+      setCategories(flatData);
+      setTotalItems(flatData.length);
       setTotalItems(data.totalElements || 0);
     } catch (error) {
       console.error('Lỗi tải danh mục:', error);
@@ -50,17 +73,13 @@ const CategoriesManager = () => {
       setLoading(false);
     }
   };
-  const handleSearch = () => {
-    setPage(0);
-    loadCategories();
-  };
 
   const handleEditClick = (category) => {
     setEditingCategory(category);
     setEditForm({
       name: category.name || '',
       seoName: category.seoName || '',
-      categoryParentId: category.category?.id || '',
+      categoryParentId: category.parentId || '',
       status: category.status || 'ACTIVE',
     });
   };
@@ -106,10 +125,16 @@ const CategoriesManager = () => {
   };
 
   const columns = [
-    {key: "id", label: "ID"}, 
-    {key: "name", label: "Tên danh mục"}, 
-    {key: "seoName", label: "Seo name"}, 
-  ]
+    { key: "id", label: "ID" },
+    { key: "name", label: "Tên danh mục" },
+    { key: "seoName", label: "Seo name" },
+    { key: "parentName", label: "Danh mục cha" },
+  ];
+  const tableData = categories.map(cat => ({
+    ...cat,
+    parentName: cat.parent ? cat.parent.name : '—',
+    name: `${'— '.repeat(cat.level)}${cat.name}`, // thụt lề category con
+  }));
   return (
     <ClippedDrawer>
       <div className="p-6 max-w-7xl mx-auto space-y-6 bg-gray-50 min-h-[calc(100vh-80px)]">
@@ -127,20 +152,15 @@ const CategoriesManager = () => {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
+            <label>Tìm kiếm</label>
             <input
               type="text"
               placeholder="Tìm theo tên danh mục..."
               className="border px-4 py-2 rounded w-72 outline-none"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={(e) => e.key === 'Enter'}
             />
-            <button
-              onClick={handleSearch}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-            >
-              Tìm kiếm
-            </button>
           </div>
           <div className="flex gap-4 items-center justify-end">
             <select
@@ -185,7 +205,7 @@ const CategoriesManager = () => {
         ) : (
           <Table
             columns={columns}
-            data={categories}
+            data={tableData}
             pageSize={pageSize}
             totalItems={totalItems}
             currentPage={currentPage}
@@ -260,12 +280,23 @@ const CategoriesManager = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">ID danh mục cha</label>
-                      <input
+                      <select
                         className="border px-3 py-2 rounded w-full"
-                        value={editForm.categoryParentId}
-                        onChange={(e) => setEditForm({ ...editForm, categoryParentId: e.target.value })}
-                        placeholder="ID danh mục cha"
-                      />
+                        value={editForm.categoryParentId || ''}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            categoryParentId: e.target.value || null,
+                          })
+                        }
+                      >
+                        <option value="">-- Danh mục gốc --</option>
+                        {parentOptions.map(cat => (
+                          <option key={cat.id} value={cat.id}>
+                            {`${'— '.repeat(cat.level)}${cat.name}`}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
                     <div>

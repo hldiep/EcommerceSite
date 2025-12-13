@@ -2,7 +2,7 @@ const API_URL = `/api/v1/m/orders`;
 export const getOrder = async ({
     page = 0,
     size = 10,
-    search = '',
+    keyword = '',
     sortBy = 'id',
     direction = 'asc',
 }) => {
@@ -15,7 +15,9 @@ export const getOrder = async ({
         url.searchParams.append('size', size);
         url.searchParams.append('sortBy', sortBy);
         url.searchParams.append('direction', direction);
-        if (search) url.searchParams.append('search', search);
+        if (keyword && keyword.trim() !== '') {
+            url.searchParams.append('keyword', keyword.trim());
+        }
 
         const response = await fetch(url, {
             method: 'GET',

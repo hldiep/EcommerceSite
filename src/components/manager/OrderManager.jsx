@@ -52,12 +52,6 @@ const OrderManager = () => {
         setDirection(e.target.value);
         setPage(0);
     };
-
-    const handleSearch = () => {
-        setPage(0);
-        loadOrder();
-    };
-
     const convertToTableData = (orders) =>
         orders.flatMap(order =>
             order.orderItems?.map(item => ({
@@ -137,7 +131,6 @@ const OrderManager = () => {
         <ClippedDrawer>
             <div className="p-6 max-w-7xl mx-auto space-y-6 bg-gray-50 min-h-[calc(100vh-80px)]">
 
-                {/* Breadcrumb */}
                 <div className="sticky top-16 z-10 bg-white border-b shadow-sm">
                     <div className="flex items-center text-sm text-gray-600 space-x-2 px-4 pt-2">
                         <button onClick={() => navigate('/tongquan')} className="hover:underline text-blue-600">
@@ -149,20 +142,17 @@ const OrderManager = () => {
                     <h2 className="text-xl font-semibold p-4">Quản lý đơn hàng</h2>
                 </div>
 
-                {/* Search + Sort */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
+                        <label htmlFor="">Tìm kiếm</label>
                         <input
                             type="text"
                             placeholder="Tìm theo tên sản phẩm..."
                             className="border px-4 py-2 rounded w-72 outline-none"
                             value={keyword}
                             onChange={(e) => setKeyword(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            onKeyDown={(e) => e.key === 'Enter'}
                         />
-                        <button onClick={handleSearch} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-                            Tìm kiếm
-                        </button>
                     </div>
 
                     <div className="flex gap-4 items-center justify-end">

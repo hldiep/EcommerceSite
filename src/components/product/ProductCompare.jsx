@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { fetchChatAI, fetchChatAICompareProduct } from "../../api/chat-ai";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import ModalAICompare from "./ModalPopup";
 const ProductCompare = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -170,7 +169,7 @@ const ProductCompare = () => {
                                     <input
                                         value={compareQuery}
                                         onChange={(e) => setCompareQuery(e.target.value)}
-                                        placeholder="Nhập yêu cầu cần AI phân tích…"
+                                        placeholder="Nhập yêu cầu của bạn để AI phân tích nếu cần nhé!"
                                         className="border px-3 py-2 rounded w-[420px] outline-none text-sm"
                                     />
 

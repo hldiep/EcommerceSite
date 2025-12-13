@@ -1,6 +1,6 @@
 const API_URL = `/api/v1/m/reviews`;
 
-export const fetchReviewsWithPaging = async ({ page = 0, size = 10, search = '' }) => {
+export const fetchReviewsWithPaging = async ({ page = 0, size = 10, keyword = '' }) => {
     try {
         const token = localStorage.getItem('MANAGER_token');
         if (!token) {
@@ -13,8 +13,8 @@ export const fetchReviewsWithPaging = async ({ page = 0, size = 10, search = '' 
         url.searchParams.append('sortBy', 'id');
         url.searchParams.append('direction', 'desc');
 
-        if (search) {
-            url.searchParams.append('search', search);
+        if (keyword && keyword.trim() !== '') {
+            url.searchParams.append('keyword', keyword.trim());
         }
 
         const response = await fetch(url, {

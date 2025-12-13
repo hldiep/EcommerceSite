@@ -39,14 +39,14 @@ const DiscountManager = () => {
 
     useEffect(() => {
         loadDiscounts();
-    }, [page, sortBy, direction, pageSize]);
+    }, [page, sortBy, direction, pageSize, keyword]);
     const loadDiscounts = async () => {
         setLoading(true);
         try {
             const data = await fetchDiscountsWithPaging({
                 page,
                 size: pageSize,
-                search: keyword,
+                keyword: keyword,
                 sortBy,
                 direction,
             });
@@ -57,10 +57,6 @@ const DiscountManager = () => {
         } finally {
             setLoading(false);
         }
-    };
-    const handleSearch = () => {
-        setPage(0);
-        loadDiscounts();
     };
 
     const handleEditClick = (discount) => {
@@ -163,20 +159,15 @@ const DiscountManager = () => {
 
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
+                        <label htmlFor="">Tìm kiếm</label>
                         <input
                             type="text"
-                            placeholder="Tìm kiếm..."
+                            placeholder="Nhập tìm kiếm..."
                             className="border px-4 py-2 rounded w-72 outline-none"
                             value={keyword}
                             onChange={(e) => setKeyword(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            onKeyDown={(e) => e.key === 'Enter'}
                         />
-                        <button
-                            onClick={handleSearch}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-                        >
-                            Tìm kiếm
-                        </button>
                     </div>
                     <div className="flex gap-4 items-center justify-end">
                         <select
@@ -227,17 +218,17 @@ const DiscountManager = () => {
                     </div>
                 ) : (
                     <Table
-                     columns={columns}
-                     pageSize={pageSize}
-                     currentPage={currentPage}
-                     totalItems={totalItems}
-                     data={discounts}
-                     onPaging={(p)=>{
-                        setCurrentPage(p);
-                        setPage(p-1)
-                     }}
-                     onPagingSizeChange={(size) => setPageSize(size)}
-                     onRowClick={(row) => handleEditClick(row)}
+                        columns={columns}
+                        pageSize={pageSize}
+                        currentPage={currentPage}
+                        totalItems={totalItems}
+                        data={discounts}
+                        onPaging={(p)=>{
+                            setCurrentPage(p);
+                            setPage(p-1)
+                        }}
+                        onPagingSizeChange={(size) => setPageSize(size)}
+                        onRowClick={(row) => handleEditClick(row)}
                     />
                 )}
                 <Transition.Root show={!!editingDiscount} as={Fragment}>

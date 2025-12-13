@@ -2,26 +2,32 @@ import React, { useState } from 'react';
 import { fetchProductsPublicWithPaging } from '../../api/product';
 
 const CompareBar = ({ compareItems, onRemove, onClearAll, onCompare, onAdd, onClose }) => {
-    const [brandProducts, setBrandProducts] = useState([]);
+    const [categoryProducts, setCategoryProducts] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [loadingSuggestions, setLoadingSuggestions] = useState(false);
     const handleShowSuggestions = async () => {
         if (compareItems.length === 0) return;
 
-        const brandId = compareItems[0]?.brand?.id;
-        if (!brandId) return;
+        const categoryId = compareItems[0]?.categories?.[0]?.id;
+        if (!categoryId) return;
+
+        setShowSuggestions(true);     
+        setLoadingSuggestions(true);  
+        setCategoryProducts([]);   
 
         try {
             const result = await fetchProductsPublicWithPaging({
-                brandId,
+                categoryId,
                 page: 0,
-                size: 5,
+                size: 100,
             });
 
-            setBrandProducts(Array.isArray(result.data) ? result.data : []);
-            setShowSuggestions(true);
+            setCategoryProducts(Array.isArray(result.data) ? result.data : []);
         } catch (err) {
-            console.error("Lỗi fetch sản phẩm theo brand:", err);
-            setBrandProducts([]);
+            console.error("Lỗi fetch sản phẩm:", err);
+            setCategoryProducts([]);
+        } finally {
+            setLoadingSuggestions(false); // tắt loading
         }
     };
 
@@ -41,7 +47,7 @@ const CompareBar = ({ compareItems, onRemove, onClearAll, onCompare, onAdd, onCl
                     </div>
                 ))}
 
-                {Array.from({ length: 4 - compareItems.length }).map((_, i) => (
+                {Array.from({ length: 3 - compareItems.length }).map((_, i) => (
                     <div
                         key={i}
                         onClick={handleShowSuggestions}
@@ -75,7 +81,7 @@ const CompareBar = ({ compareItems, onRemove, onClearAll, onCompare, onAdd, onCl
             {showSuggestions && (
                 <div className="absolute bottom-20 bg-white shadow-lg border rounded p-4 max-w-md w-full">
                     <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-sm font-semibold">Sản phẩm cùng thương hiệu</h3>
+                        <h3 className="text-sm font-semibold">Sản phẩm cùng danh mục</h3>
                         <button
                             onClick={() => setShowSuggestions(false)}
                             className="text-gray-400 hover:text-red-500 font-bold"
@@ -83,29 +89,44 @@ const CompareBar = ({ compareItems, onRemove, onClearAll, onCompare, onAdd, onCl
                             ×
                         </button>
                     </div>
-                    {brandProducts.length > 0 ? (
-                        <div className="grid grid-cols-2 gap-2">
-                            {brandProducts.map((p) => (
+
+                    {loadingSuggestions ? (
+                        <div className="flex items-center justify-center py-10 text-sm text-gray-500">
+                            <span className="animate-spin mr-2 h-4 w-4 border-2 border-blue-500 border-r-transparent rounded-full"></span>
+                            Đang tải sản phẩm...
+                        </div>
+                    ) : categoryProducts.length > 0 ? (
+                        <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto pr-1">
+                            {categoryProducts.map((p) => (
                                 <div
                                     key={p.id}
                                     className="p-2 border rounded cursor-pointer hover:bg-gray-100"
                                     onClick={() => {
-                                        if (!compareItems.find((ci) => ci.id === p.id)) {
-                                            onAdd(p); // dùng callback thay vì push
+                                        if (!compareItems.find(ci => ci.id === p.id)) {
+                                            onAdd(p);
                                         }
                                         setShowSuggestions(false);
                                     }}
                                 >
-                                    <img src={p.imageUrl} alt={p.name} className="w-12 h-12 mx-auto object-contain" />
-                                    <p className="text-xs mt-1 text-center">{p.name}</p>
+                                    <img
+                                        src={p.imageUrl}
+                                        alt={p.name}
+                                        className="w-12 h-12 mx-auto object-contain"
+                                    />
+                                    <p className="text-xs mt-1 text-center line-clamp-2">
+                                        {p.name}
+                                    </p>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <p className="text-sm text-gray-500">Không có sản phẩm nào</p>
+                        <p className="text-sm text-gray-500 py-6 text-center">
+                            Không có sản phẩm nào
+                        </p>
                     )}
                 </div>
             )}
+
         </div>
     );
 };
