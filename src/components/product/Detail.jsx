@@ -45,7 +45,6 @@ const Detail = () => {
             try {
                 setLoading(true);
                 const data = await fetchProductPublicById(id);
-                console.log("Data", data)
                 setProduct(data);
                 setSelectedVariant(data?.variants?.[0] || null);
             } catch (error) {

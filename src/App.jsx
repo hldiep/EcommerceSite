@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import Home from './components/home/Home'
 import Brand from './components/category/Brand'
 import Register from './components/login/Register'
@@ -81,7 +81,6 @@ function App() {
           <Route path="payment-success" element={<PaymentSuccess />} />
           <Route path="credit-card-payment" element={<CreditCardPayment />} />
 
-          <Route path="review" element={<Review />} />
         </Route>
 
         <Route path='/tongquan' element={<Tongquan />} />

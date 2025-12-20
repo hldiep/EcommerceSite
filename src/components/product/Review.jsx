@@ -27,8 +27,6 @@ export default function Review({ productId }) {
 
             console.log("fetchReviewsByProductId response:", res);
 
-            // Nếu API trả về { data: {...} } thì lấy res.data,
-            // nếu API trả về trực tiếp review object thì lấy res.
             const reviewObj = res?.data ?? res ?? null;
             setReview(reviewObj);
         } catch (err) {
@@ -61,7 +59,6 @@ export default function Review({ productId }) {
             <div className="container mb-10">
                 <div className="max-w-2xl mx-auto p-4 space-y-6">
 
-                    {/* Tổng quan đánh giá */}
                     <div className="p-6 rounded-2xl shadow-md border bg-white text-center">
                         <h2 className="text-xl font-semibold mb-2">Đánh giá sản phẩm</h2>
 
@@ -78,7 +75,6 @@ export default function Review({ productId }) {
                         </div>
                     </div>
 
-                    {/* Chi tiết đánh giá */}
                     <div className="p-4 rounded-2xl shadow-md border bg-white">
                         <div className="flex items-center space-x-3">
                             <img

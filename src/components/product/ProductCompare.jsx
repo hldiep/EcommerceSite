@@ -72,7 +72,7 @@ const ProductCompare = () => {
             const ids = products.map((p) => p.id);
             const queryToUse =
                 compareQuery.trim() === ""
-                    ? "so sánh hai sản phẩm trên"
+                    ? "so sánh các sản phẩm trên"
                     : compareQuery;
 
             const result = await fetchChatAICompareProduct(ids, queryToUse);

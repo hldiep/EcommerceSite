@@ -243,7 +243,8 @@ const User = () => {
                                                                                 
                                                                                 navigate(`/profile/review/${item.productVariant.product.id}`, {
                                                                                     state: {
-                                                                                        productId: item.productVariant.product.id
+                                                                                        productId: item.productVariant.product.id,
+                                                                                        productVariant: item.productVariant
                                                                                     }
                                                                                 })
                                                                             }

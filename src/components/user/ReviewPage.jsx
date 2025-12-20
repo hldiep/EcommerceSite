@@ -8,13 +8,13 @@ const ReviewPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const productId = location.state?.productId;
-
+    const productVariant = location.state?.productVariant;
     const [isChecking, setIsChecking] = useState(true); 
     const [allowReview, setAllowReview] = useState(false);
 
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState("");
-
+    console.log("Data", productVariant)
     useEffect(() => {
         const checkReview = async () => {
             try {
@@ -26,7 +26,6 @@ const ReviewPage = () => {
 
                 toast.info("Bạn đã đánh giá sản phẩm này trước đó.");
                 navigate(`/detail/${productId}`);
-
 
             } catch (err) {
                 console.log("Check review error:", err);
@@ -82,6 +81,31 @@ const ReviewPage = () => {
         <div className='min-h-screen'>            
             <div className="max-w-xl mx-auto mt-32 bg-white p-6 rounded shadow">
                 <h2 className="text-xl font-bold mb-4">Đánh giá sản phẩm</h2>
+
+                <div className="flex gap-4 border rounded-lg p-4 mb-6 bg-gray-50">
+                    <img
+                        src={productVariant?.imageUrl || productVariant?.product?.thumbnail}
+                        alt={productVariant?.name}
+                        className="w-24 h-24 object-cover rounded border"
+                    />
+
+                    <div className="flex-1">
+                        <h3 className="font-semibold text-lg">
+                            {productVariant?.product?.name}
+                        </h3>
+
+                        <p className="text-sm text-gray-600 mt-1">
+                            Phiên bản: {productVariant?.name}
+                        </p>
+                        <div className='flex items-center space-x-3 mt-2'>
+                            <div className="text-red-600 font-bold">
+                                {productVariant?.priceSale?.toLocaleString("vi-VN")} ₫
+                            </div>
+                            <div className="text-gray-400 text-sm line-through">{productVariant?.price?.toLocaleString("vi-VN")} ₫</div>
+                        </div>
+                        
+                    </div>
+                </div>
 
                 <p className="mb-4 text-gray-600">
                     Mã sản phẩm: <b>{productVariantId}</b>  

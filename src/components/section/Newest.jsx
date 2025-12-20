@@ -12,7 +12,6 @@ const Newest = () => {
     const loadProducts = async () => {
       try {
         const data = await fetchNewestProducts(10);
-        console.log('Dữ liệu', data);
         setProducts(data.data || []);
       } catch (err) {
         console.error("Lỗi tải sản phẩm bán chạy:", err);
