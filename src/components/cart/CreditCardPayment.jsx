@@ -10,7 +10,7 @@ import {
 import { addOrder } from "../../api/order";
 import { toast } from "react-toastify";
 
-const stripePromise = loadStripe("");
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const CheckoutForm = ({ orderInfo }) => {
     const navigate = useNavigate();
@@ -52,11 +52,11 @@ const CheckoutForm = ({ orderInfo }) => {
             const res = await fetch("https://api.stripe.com/v1/payment_intents", {
                 method: "POST",
                 headers: {
-                    Authorization: ``,
+                    Authorization: `Bearer ${import.meta.env.VITE_STRIPE_SECRET_KEY}`,
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
                 body: new URLSearchParams({
-                    amount: Math.round(orderInfo.finalAmount * 100 / 1000), // VND
+                    amount: Math.round(finalAmount),
                     currency: "vnd",
                     "payment_method_types[]": "card",
                 }),
@@ -101,6 +101,12 @@ const CheckoutForm = ({ orderInfo }) => {
                     orderTime: new Date().toISOString(),
                     note: orderInfo.orderData.note || "",
                     deliveryAddress: orderInfo.orderData.deliveryAddress,
+                    // deliveryAddress: {
+                    //     province: orderInfo.orderData.province,
+                    //     district: orderInfo.orderData.district,
+                    //     commune: orderInfo.orderData.commune,
+                    //     detail: orderInfo.orderData.addressDetail,
+                    // },
                     recipientName: orderInfo.orderData.recipientName,
                     recipientPhone: orderInfo.orderData.recipientPhone,
                     payment: {
@@ -166,7 +172,7 @@ const CheckoutForm = ({ orderInfo }) => {
                                 Đang xử lý...
                             </span>
                         ) : (
-                            <>Thanh toán {orderInfo.finalAmount || orderInfo2.finalAmount} VNĐ</>
+                            <>Thanh toán {finalAmount.toLocaleString()} VNĐ</>
                         )}
                     </button>
                 </form>

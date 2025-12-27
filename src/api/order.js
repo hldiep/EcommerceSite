@@ -1,7 +1,12 @@
 const API_URL = `/api/v1/orders`;
-
+const getAuthToken = () => {
+  return (
+    localStorage.getItem("CUSTOMER_token") ||
+    localStorage.getItem("TEMP_ORDER_TOKEN")
+  );
+};
 export const addOrder = async (payload) => {
-    const token = localStorage.getItem('CUSTOMER_token');
+    const token = localStorage.getItem("CUSTOMER_token") || localStorage.getItem("TEMP_ORDER_TOKEN");
     try {
         const response = await fetch(`${API_URL}/add`, {
             method: 'POST',
