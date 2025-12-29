@@ -58,6 +58,7 @@ const Detail = () => {
   }, [id]);
   useEffect(() => {
     if (!product) return;
+
     let viewed = JSON.parse(localStorage.getItem("recentViewed")) || [];
 
     viewed = viewed.filter((item) => item.id !== product.id);
@@ -69,21 +70,33 @@ const Detail = () => {
       price: product.productVariants?.[0]?.priceSale ?? null,
     });
 
-    viewed = viewed.slice(0, 10);
-    localStorage.setItem("recentViewed", JSON.stringify(viewed));
-  }),
-    [product];
+    localStorage.setItem("recentViewed", JSON.stringify(viewed.slice(0, 10)));
+  }, [product]);
   useEffect(() => {
     if (product?.variants?.length > 0) {
       setSelectedVariant(product.variants[0]);
     }
   }, [product]);
-  if (!product)
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <div className="flex items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-r-transparent"></div>
+          <div className="ml-4 text-blue-600 font-medium text-lg">
+            Đang tải dữ liệu...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
     return (
       <div className="p-10 text-center text-red-500">
         Không tìm thấy sản phẩm
       </div>
     );
+  }
   const handleAddToCart = ({
     user,
     role,
