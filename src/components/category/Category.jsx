@@ -247,10 +247,12 @@ const Category = () => {
                     {product.name || "Không có tên"}
                   </h3>
 
-                  <div className="text-red-600 font-bold text-lg">{price}</div>
+                  <div className="text-red-600 font-bold text-lg">
+                    {price.toLocaleString()}đ
+                  </div>
                   {originalPrice && price !== originalPrice && (
                     <div className="text-gray-400 text-sm line-through">
-                      {originalPrice}
+                      {originalPrice.toLocaleString()}đ
                     </div>
                   )}
 

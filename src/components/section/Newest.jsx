@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
-import { fetchNewestProducts } from '../../api/product';
-import { FaHeart, FaStar } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { fetchNewestProducts } from "../../api/product";
+import { FaHeart, FaStar } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const Newest = () => {
   const navigate = useNavigate();
@@ -22,20 +22,25 @@ const Newest = () => {
 
     loadProducts();
   }, []);
-  if (loading) return <div className="flex justify-center items-center py-10">
-    <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-r-transparent"></div>
-    <div className="ml-4 text-blue-600 font-medium text-lg">Đang tải dữ liệu...</div>
-  </div>;
+  if (loading)
+    return (
+      <div className="flex justify-center items-center py-10">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-r-transparent"></div>
+        <div className="ml-4 text-blue-600 font-medium text-lg">
+          Đang tải dữ liệu...
+        </div>
+      </div>
+    );
   return (
     <div className="px-4 mt-10">
-      <h2 className="text-2xl font-bold mb-4">
-        SẢN PHẨM MỚI NHẤT
-      </h2>
+      <h2 className="text-2xl font-bold mb-4">SẢN PHẨM MỚI NHẤT</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {products.map((product) => {
           const variant = product.productVariants?.[0] || {};
           const discount = variant.price
-            ? Math.round(((variant.price - variant.priceSale) / variant.price) * 100)
+            ? Math.round(
+                ((variant.price - variant.priceSale) / variant.price) * 100
+              )
             : 0;
 
           return (
@@ -58,8 +63,12 @@ const Newest = () => {
                 {product.name}
               </h3>
 
-              <div className="text-red-600 font-bold text-lg">{variant.priceSale}</div>
-              <div className="text-gray-400 text-sm line-through">{variant.price}</div>
+              <div className="text-red-600 font-bold text-lg">
+                {variant.priceSale.toLocaleString()}đ
+              </div>
+              <div className="text-gray-400 text-sm line-through">
+                {variant.price.toLocaleString()}đ
+              </div>
 
               <div className="flex items-center justify-between text-sm mt-2">
                 <div className="flex items-center gap-1 text-yellow-500">
@@ -75,6 +84,6 @@ const Newest = () => {
       </div>
     </div>
   );
-}
+};
 
-export default Newest
+export default Newest;

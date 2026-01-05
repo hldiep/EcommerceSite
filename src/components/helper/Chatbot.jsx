@@ -2,13 +2,16 @@ import React, { useState, useRef, useEffect } from "react";
 import { FaRobot, FaTimes } from "react-icons/fa";
 import { fetchChatAI } from "../../api/chat-ai";
 import ReactMarkdown from "react-markdown";
-import { motion, AnimatePresence } from "framer-motion"; 
-
+import { motion, AnimatePresence } from "framer-motion";
+import rehypeRaw from "rehype-raw";
 const Chatbot = () => {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
-    { type: "bot", text: "Xin chào Anh/Chị! Em là trợ lý AI của cửa hàng. Em sẵn sàng hỗ trợ tư vấn sản phẩm, so sánh giá và giải đáp mọi thắc mắc của Anh/Chị." },
+    {
+      type: "bot",
+      text: "Xin chào Anh/Chị! Em là trợ lý AI của cửa hàng. Em sẵn sàng hỗ trợ tư vấn sản phẩm, so sánh giá và giải đáp mọi thắc mắc của Anh/Chị.",
+    },
   ]);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -17,19 +20,28 @@ const Chatbot = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const buildHistory=(messages)=>{
-    const history=[];
-    for(let i=0;i<messages.length;i++){
-      if(messages[i].type==="user"){
-        const nextBot=messages[i+1]?.type==="bot"?messages[i+1].text:"";
+  const buildHistory = (messages) => {
+    const history = [];
+    for (let i = 0; i < messages.length; i++) {
+      if (messages[i].type === "user") {
+        const nextBot =
+          messages[i + 1]?.type === "bot" ? messages[i + 1].text : "";
         history.push({
-          user:messages[i].text,
-          assistant:nextBot,
+          user: messages[i].text,
+          assistant: nextBot,
         });
       }
     }
     return history;
-  }
+  };
+  const formatBotText = (text) => {
+    if (!text) return text;
+
+    return text.replace(
+      /xem chi tiết/gi,
+      `<i style="color:#2563eb;font-style:italic;font-weight:500">Xem chi tiết</i>`
+    );
+  };
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -39,8 +51,8 @@ const Chatbot = () => {
     setLoading(true);
 
     try {
-      const history=buildHistory([...messages,userMessage]);
-      const res = await fetchChatAI(userMessage.text,history); 
+      const history = buildHistory([...messages, userMessage]);
+      const res = await fetchChatAI(userMessage.text, history);
       const botMessage = {
         type: "bot",
         text: res || "Hiện tại em chưa có câu trả lời.",
@@ -107,7 +119,9 @@ const Chatbot = () => {
                       msg.type === "bot" ? "bg-blue-100" : "bg-pink-100"
                     }`}
                   >
-                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    <ReactMarkdown rehypePlugins={[rehypeRaw]}>
+                      {msg.type === "bot" ? formatBotText(msg.text) : msg.text}
+                    </ReactMarkdown>
                   </div>
                 </div>
               ))}
